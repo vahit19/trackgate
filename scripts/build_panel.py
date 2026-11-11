@@ -63,6 +63,10 @@ def main():
     }
     tpl = open(os.path.join(ROOT, "panel", "template.html"), encoding="utf-8").read()
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":")))
+    # real agent runs, replayed when a viewer's network cannot reach the live agent (scripts/record_runs.py)
+    rec = os.path.join(ROOT, "panel", "recorded_runs.json")
+    runs = json.load(open(rec, encoding="utf-8")) if os.path.exists(rec) else []
+    html = html.replace("/*RECORDED*/[]", json.dumps(runs, separators=(",", ":")))
     out = os.path.join(ROOT, "panel", "index.html")
     open(out, "w", encoding="utf-8").write(html)
     # the same page as a complete document for hosting outside Claude (our server, GitHub Pages)
