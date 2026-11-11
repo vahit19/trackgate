@@ -6,3 +6,4 @@ results_run.log
 .env
 run_*.log
 triage_*.log
+video/build/

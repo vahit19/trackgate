@@ -35,8 +35,8 @@ printf 'OPENROUTER_API_KEY=%s\nTRACKGATE_MODEL=anthropic/claude-haiku-5.5\nTRACK
 
 echo "== 3/5 page"
 "${SSH[@]}" 'mkdir -p /var/www/vahitferyad.com/trackgate'
-"${SCP[@]}" deploy/site/index.html "$HOST":/var/www/vahitferyad.com/trackgate/index.html
-"${SSH[@]}" 'chmod 644 /var/www/vahitferyad.com/trackgate/index.html'
+"${SCP[@]}" deploy/site/index.html deploy/site/trackgate-tour.mp4 deploy/site/trackgate-tour.jpg "$HOST":/var/www/vahitferyad.com/trackgate/
+"${SSH[@]}" 'chmod 644 /var/www/vahitferyad.com/trackgate/*'
 
 echo "== 4/5 nginx (only the vahitferyad.com file)"
 "${SSH[@]}" 'set -e
