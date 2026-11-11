@@ -548,6 +548,16 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
   }
   window.addEventListener("error", (e) => track("js_error", { detail: `${e.message} @${String(e.filename || "").split("/").pop()}:${e.lineno}` }));
   window.addEventListener("unhandledrejection", (e) => track("js_error", { detail: "promise: " + String(e.reason && (e.reason.message || e.reason.code || e.reason)).slice(0, 300) }));
+  // tool arguments arrive as a JSON string, an object, or occasionally several JSON objects glued together
+  function parseArgs(raw) {
+    if (raw && typeof raw === "object") return raw;
+    const txt = String(raw || "").trim();
+    if (!txt) return {};
+    try { return JSON.parse(txt); } catch (e) {}
+    const parts = txt.match(/\{[^{}]*\}/g);
+    if (parts) { const out = {}; for (const p of parts) { try { Object.assign(out, JSON.parse(p)); } catch (e) {} } if (Object.keys(out).length) return out; }
+    throw new Error("could not read the arguments; call the tool again with valid JSON");
+  }
   async function serverSample(input, { tools, onText, signal }) {
     const msgs = input.map((m, i) => ({ role: i === 0 ? "system" : m.role, content: m.content }));
     const defs = tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.inputSchema || { type: "object", properties: {} } } }));
@@ -563,7 +573,8 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
       msgs.push({ role: "assistant", content: message.content || "", tool_calls: calls });
       for (const c of calls) {
         const t = tools.find((x) => x.name === (c.function && c.function.name)); let out;
-        try { out = t ? await t.execute(JSON.parse((c.function && c.function.arguments) || "{}")) : { error: "unknown tool" }; } catch (e) { out = { error: String((e && e.message) || e) }; }
+        try { out = t ? await t.execute(parseArgs(c.function && c.function.arguments)) : { error: "unknown tool; use one of: " + tools.map((x) => x.name).join(", ") }; }
+        catch (e) { out = { error: String((e && e.message) || e) + ". Fix the input and call the tool again." }; track("agent_error", { code: "tool:" + ((c.function && c.function.name) || "?"), detail: String((e && e.message) || e).slice(0, 200) }); }
         msgs.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(out === undefined ? null : out).slice(0, 12000) });
       }
     }
@@ -912,7 +923,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
     return { n, bad: [...new Set(bad)] };
   }
   const LABEL = { list_games: "Reading all games", game_detail: "Opening game detail", simulate_gate: "Testing a gate", set_gate: "Setting your gate", open_game: "Opening the game", show_moment: "Opening the moment", review_status: "Reading reviewer decisions", acceptance_report: "Writing the report" };
-  const RULES = () => `You are the analyst inside TrackGate, an application that tests whether two player-tracking feeds agree before the data is trusted for officiating, betting or broadcast. This run: ${games.length} games of the 2022 FIFA World Cup, PFF FC broadcast tracking compared with StatsBomb 360 freeze frames; neither feed is ground truth. Human reviewers decide from video which feed is right in the review queue. Rules: use the tools for every figure and never state a number you did not get from a tool; copy each figure exactly as the tool returned it (keep its one decimal, never round or truncate); never work out a range, extreme, total or average yourself: quote the lowest/highest/passing fields a tool returns, or call simulate_gate to get them. Open at most one screen per answer, the one that shows your main point, and call it last. When your answer points at a game, a moment or a gate, open it for the viewer with open_game, show_moment or set_gate. Reply in English, at most 70 words, in exactly three short lines: (1) the direct answer in one sentence, (2) the one or two figures that prove it, (3) "Recommendation:" followed by one practical step. Plain words for a league operations or broadcast data lead; no lists, no jargon; never show game ids, name games by their teams. The viewer is on the ${st.view} screen; current gate: ${gateLine()}; selected game: ${G().match} (id ${st.sel}).`;
+  const RULES = () => `You are the analyst inside TrackGate, an application that tests whether two player-tracking feeds agree before the data is trusted for officiating, betting or broadcast. This run: ${games.length} games of the 2022 FIFA World Cup, PFF FC broadcast tracking compared with StatsBomb 360 freeze frames; neither feed is ground truth. Human reviewers decide from video which feed is right in the review queue. Rules: use the tools for every figure and never state a number you did not get from a tool; copy each figure exactly as the tool returned it (keep its one decimal, never round or truncate); never work out a range, extreme, total or average yourself: quote the lowest/highest/passing fields a tool returns, or call simulate_gate to get them. Open at most one screen per answer, the one that shows your main point, and call it last. If a tool returns an error, fix the input and call it again; never tell the viewer that a tool failed. When your answer points at a game, a moment or a gate, open it for the viewer with open_game, show_moment or set_gate. Reply in English, at most 70 words, in exactly three short lines: (1) the direct answer in one sentence, (2) the one or two figures that prove it, (3) "Recommendation:" followed by one practical step. Plain words for a league operations or broadcast data lead; no lists, no jargon; never show game ids, name games by their teams. The viewer is on the ${st.view} screen; current gate: ${gateLine()}; selected game: ${G().match} (id ${st.sel}).`;
   function suggestions() {
     const second = games.slice().sort((a, b) => b.over5.rate - a.over5.rate)[1];
     if (st.view === "games") return [`Explain the result for ${G().match}.`, "Which games pass if only PFF visible positions count?", "Give me an acceptance report at 5 m with a 10% limit."];
