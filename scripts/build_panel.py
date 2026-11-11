@@ -11,14 +11,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def dedupe(queue):
-    """StatsBomb logs several events on one freeze frame (a receipt and the carry
-    that follows); keep one review item per moment."""
-    seen, out = set(), []
+    """StatsBomb logs several events on one freeze frame, and one incident spans
+    several frames; keep one review item per incident."""
+    out = []
     for q in queue:
-        key = (q["period"], round(q["statsbomb_t"], 1), q["median_m"])
-        if key in seen:
+        # one review item per incident: skip moments within 20 s of a worse one already kept
+        if any(k["period"] == q["period"] and abs(k["statsbomb_t"] - q["statsbomb_t"]) < 20 for k in out):
             continue
-        seen.add(key)
         out.append(q)
     return out
 
