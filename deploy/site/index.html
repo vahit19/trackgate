@@ -564,8 +564,13 @@ const RECORDED = [{"q":"Which game fails worst? Show me the worst moment.","view
     const defs = tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.inputSchema || { type: "object", properties: {} } } }));
     for (let step = 0; step < 8; step++) {
       let r;
-      try { r = await fetch(API + "chat", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ messages: msgs, tools: defs, sid }), signal }); }
-      catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
+      for (let attempt = 0; attempt < 2; attempt++) {   // one quiet retry when the model provider has a hiccup
+        try { r = await fetch(API + "chat", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ messages: msgs, tools: defs, sid }), signal }); }
+        catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
+        if (r.ok || r.status === 429 || attempt === 1) break;
+        track("agent_error", { code: "retry_" + r.status });
+        await new Promise((res) => setTimeout(res, 1500));
+      }
       if (r.status === 429) throw { code: "rate_limited" };
       if (!r.ok) throw { code: "server" };
       const { message } = await r.json();
