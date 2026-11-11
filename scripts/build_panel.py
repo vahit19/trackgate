@@ -65,6 +65,15 @@ def main():
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":")))
     out = os.path.join(ROOT, "panel", "index.html")
     open(out, "w", encoding="utf-8").write(html)
+    # the same page as a complete document for hosting outside Claude (our server, GitHub Pages)
+    icon = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231fd29b'/%3E"
+            "%3Cg fill='none' stroke='%2304130e' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/g%3E%3C/svg%3E")
+    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+            '<meta name="description" content="TrackGate tests whether two player-tracking feeds agree before the data is trusted for officiating, betting or broadcast.">'
+            f'<link rel="icon" href="{icon}">' + html + "</html>\n")
+    os.makedirs(os.path.join(ROOT, "deploy", "site"), exist_ok=True)
+    open(os.path.join(ROOT, "deploy", "site", "index.html"), "w", encoding="utf-8").write(page)
     print(out, len(games), "games", json.dumps(data["totals"]))
 
 

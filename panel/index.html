@@ -526,6 +526,40 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
   const games = DATA.games, T = DATA.totals;
   const frames = games.reduce((a, g) => a + g.events, 0);
 
+  // ---------- hosting: inside Claude the analyst uses Claude; elsewhere it uses our API ----------
+  const inClaude = !!(window.claude && window.claude.use);
+  const API = location.hostname === "vahitferyad.com" ? "/trackgate/api/" : "https://vahitferyad.com/trackgate/api/";
+  let sid = Math.random().toString(36).slice(2, 12);
+  try { const s0 = sessionStorage.getItem("tg_sid"); if (s0) sid = s0; else sessionStorage.setItem("tg_sid", sid); } catch (e) {}
+  function track(type, data) {
+    if (inClaude) return;
+    try { const b = JSON.stringify({ type, sid, host: location.hostname, ...(data || {}) });
+      if (!(navigator.sendBeacon && navigator.sendBeacon(API + "event", new Blob([b], { type: "text/plain" })))) fetch(API + "event", { method: "POST", headers: { "Content-Type": "text/plain" }, body: b, keepalive: true }).catch(() => {}); } catch (e) {}
+  }
+  window.addEventListener("error", (e) => track("js_error", { detail: `${e.message} @${String(e.filename || "").split("/").pop()}:${e.lineno}` }));
+  window.addEventListener("unhandledrejection", (e) => track("js_error", { detail: "promise: " + String(e.reason && (e.reason.message || e.reason.code || e.reason)).slice(0, 300) }));
+  async function serverSample(input, { tools, onText, signal }) {
+    const msgs = input.map((m, i) => ({ role: i === 0 ? "system" : m.role, content: m.content }));
+    const defs = tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.inputSchema || { type: "object", properties: {} } } }));
+    for (let step = 0; step < 8; step++) {
+      let r;
+      try { r = await fetch(API + "chat", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ messages: msgs, tools: defs, sid }), signal }); }
+      catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "network" }; }
+      if (r.status === 429) throw { code: "rate_limited" };
+      if (!r.ok) throw { code: "server" };
+      const { message } = await r.json();
+      const calls = (message && message.tool_calls) || [];
+      if (!calls.length) { const text = String((message && message.content) || "").trim(); if (!text) throw { code: "server" }; onText && onText({ text }); return { text }; }
+      msgs.push({ role: "assistant", content: message.content || "", tool_calls: calls });
+      for (const c of calls) {
+        const t = tools.find((x) => x.name === (c.function && c.function.name)); let out;
+        try { out = t ? await t.execute(JSON.parse((c.function && c.function.arguments) || "{}")) : { error: "unknown tool" }; } catch (e) { out = { error: String((e && e.message) || e) }; }
+        msgs.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(out === undefined ? null : out).slice(0, 12000) });
+      }
+    }
+    throw { code: "server" };
+  }
+
   // ---------- state ----------
   const st = { view: "dashboard", dist: 5, limit: 0.05, scope: "ALL", sel: null, rv: null, rGame: "all", rStatus: "open", gf: "all", q: "" };
   let decisions = {}, reports = [], curReport = null;
@@ -695,6 +729,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
     else { decisions[m.key] = { d: k, t: Date.now() }; toast(`Saved: ${DEC[k][0]} · ${m.g.match} ${half(m.q.period)} ${clock(m.q.statsbomb_t)}`);
       const list = ALLQ.filter((x) => (st.rGame === "all" || x.g.id === st.rGame)); const i = list.indexOf(m);
       const nxt = list.slice(i + 1).concat(list.slice(0, i)).find((x) => !decisions[x.key]); if (nxt) st.rv = nxt.key; }
+    track("decision", { detail: decisions[m.key] ? k : "cleared" });
     save(); renderAll();
   }
   function step(dir) { const list = rFiltered().length ? rFiltered() : ALLQ; const i = list.findIndex((m) => m.key === st.rv); const n = list[(i + dir + list.length) % list.length]; if (n) { st.rv = n.key; vReview(); } }
@@ -718,7 +753,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
       `Human review: ${c.n} of ${ALLQ.length} queued moments decided` + (c.n ? ` (PFF FC right ${c.pff} · StatsBomb right ${c.sb} · both off ${c.both} · can't tell ${c.unsure})` : ""),
       "Neither feed is treated as ground truth; reviewed moments settle which one is off."].join("\n");
     const r = { id: String(Date.now()), by, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }), title: `${pass}/${rows.length} pass · ${Math.round(st.limit * 100)}% over ${st.dist} m`, scope: scopeName(), text, pass, of: rows.length };
-    reports.unshift(r); reports = reports.slice(0, 30); curReport = r.id; save(); return r;
+    reports.unshift(r); reports = reports.slice(0, 30); curReport = r.id; save(); track("report", { detail: by }); return r;
   }
   function vReports() {
     $("rpCount").textContent = reports.length ? `${reports.length}` : "";
@@ -755,6 +790,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
     Object.keys(VIEWS).forEach((k) => ($("v-" + k).hidden = k !== v));
     document.querySelectorAll(".side a").forEach((a) => a.classList.toggle("on", a.dataset.v === v));
     if (push && location.hash !== "#/" + v) { try { history.replaceState(null, "", "#/" + v); } catch (e) {} }
+    if (changed) track("view", { view: v });
     renderAll(); if (changed) $("main").scrollTop = 0;
     if (!turns.length && !working) setQS();
   }
@@ -776,6 +812,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
   document.querySelectorAll("[data-rs]").forEach((b) => b.addEventListener("click", () => { st.rStatus = b.dataset.rs; vReview(); }));
   $("rList").addEventListener("click", (e) => { const b = e.target.closest(".ri"); if (b) { st.rv = b.dataset.k; vReview(); } });
   $("rDec").addEventListener("click", (e) => { const b = e.target.closest("[data-dec]"); if (b) decide(b.dataset.dec); });
+  $("rVideo").addEventListener("click", () => track("video", { detail: st.rv }));
   $("rPrev").addEventListener("click", () => step(-1)); $("rNext").addEventListener("click", () => step(1));
   $("dWorstBtn").addEventListener("click", () => { if (ALLQ[0]) st.rv = ALLQ[0].key; st.rGame = "all"; st.rStatus = "all"; go("review"); });
   document.querySelectorAll("[data-d]").forEach((b) => b.addEventListener("click", () => { st.dist = Number(b.dataset.d); save(); renderAll(); }));
@@ -879,8 +916,8 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
     const bub = bot.querySelector(".bub");
     const trace = document.createElement("div"); trace.className = "trace"; bot.prepend(trace);
     const meta = document.createElement("div"); meta.className = "meta"; bot.append(meta);
-    setBusy(true);
-    const got = [];
+    setBusy(true); track("agent_question", { q: q.slice(0, 400), view: st.view });
+    const got = [], t0 = Date.now();
     const traced = tools.map((t) => ({ ...t, execute: async (i, c) => { const s = document.createElement("span"); s.textContent = LABEL[t.name] + (i && i.id && games.some((g) => g.id === String(i.id)) ? " · " + games.find((g) => g.id === String(i.id)).match : ""); trace.append(s); scrollMsgs(); const r = await t.execute(i || {}, c); got.push(r); return r; } }));
     ctl = new AbortController();
     const input = [{ role: "user", content: RULES() }, ...turns.slice(-8), { role: "user", content: q }];
@@ -890,6 +927,7 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
       if (c.bad.length) { let h = esc(text); c.bad.forEach((b) => { h = h.split(b).join(`<mark class="unv">${b}</mark>`); }); bub.innerHTML = h; meta.className = "meta bad"; meta.textContent = `Not found in the data: ${c.bad.join(", ")}. Treat highlighted figures as unverified.`; }
       else { bub.textContent = text; meta.className = "meta ok"; meta.textContent = c.n ? `✓ ${c.n} figure${c.n === 1 ? "" : "s"} checked against the data` : "✓ No figures to check"; }
       turns.push({ role: "user", content: q }, { role: "assistant", content: text });
+      track("agent_answer", { ms: Date.now() - t0, detail: c.bad.length ? "unverified: " + c.bad.join(",") : "ok", tools: got.length });
       while (reportQueue.length) {
         const rep = reportQueue.shift();
         const box = addMsg("bot", `<pre class="report"></pre><div class="row"><button type="button" class="btn sm ghost" data-copy="1">Copy report</button><button type="button" class="btn sm" data-open="1">Open in Reports</button><span class="hint" aria-live="polite"></span></div>`);
@@ -898,8 +936,8 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
         box.querySelector("[data-open]").addEventListener("click", () => { curReport = rep.id; go("reports"); });
       }
     } catch (e) {
-      const code = e && e.code;
-      const msg = { cancelled: "Stopped.", not_granted: "The analyst needs your permission to use Claude. Allow it in the prompt to continue.", rate_limited: "Too many questions at once. Try again in a minute.", tools_unavailable: "This viewer cannot run the analyst's tools.", session_expired: "Please sign in again to use the analyst.", sampling_disabled: "Claude is not available for this account." }[code] || "The analyst could not answer. Please try again.";
+      const code = e && e.code; track("agent_error", { code: String(code || (e && e.message) || "unknown").slice(0, 80) });
+      const msg = { cancelled: "Stopped.", network: "Can't reach the analyst from this network. Everything else in the app works.", server: "The analyst is busy right now. Everything else in the app works; please try again in a minute.", not_granted: "The analyst needs your permission to use Claude. Allow it in the prompt to continue.", rate_limited: "Too many questions at once. Try again in a minute.", tools_unavailable: "This viewer cannot run the analyst's tools.", session_expired: "Please sign in again to use the analyst.", sampling_disabled: "Claude is not available for this account." }[code] || "The analyst could not answer. Please try again.";
       bub.textContent = (e && e.text) || msg; meta.className = "meta bad"; meta.textContent = e && e.text ? msg : "";
       if (["not_granted", "sampling_disabled", "tools_unavailable", "not_declared", "capability_disabled"].includes(code)) { sampleFn = null; $("agentState").textContent = "Unavailable in this view"; }
     } finally { setBusy(false); scrollMsgs(); }
@@ -912,10 +950,19 @@ const DATA = {"generated":"2026-11-11","games":[{"id":"3812","match":"Senegal v 
   welcome(); setBusy(false);
   const start = location.hash.replace(/^#\/?/, "");
   go(VIEWS[start] ? start : "dashboard", true);
-  (window.claude && window.claude.use ? window.claude.use("sample") : Promise.resolve(null)).then(async (s) => {
-    const lim = s ? await s.limits().catch(() => null) : null;
-    if (!s || !lim || !lim.tools) { $("agentState").textContent = "Available when opened in Claude"; setBusy(false); return; }
-    sampleFn = s; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false);
-  }).catch(() => { $("agentState").textContent = "Available when opened in Claude"; });
+  const offline = () => { $("agentState").textContent = "Offline right now · the rest of the app works"; setBusy(false); };
+  if (inClaude) {
+    window.claude.use("sample").then(async (s) => {
+      const lim = s ? await s.limits().catch(() => null) : null;
+      if (!s || !lim || !lim.tools) return offline();
+      sampleFn = s; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false);
+    }).catch(offline);
+  } else {
+    fetch(API + "health", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((h) => {
+      if (!h || !h.ok) return offline();
+      sampleFn = serverSample; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false);
+    }).catch(offline);
+  }
+  track("load", { view: st.view, ref: String(document.referrer || "").slice(0, 300), w: innerWidth, h: innerHeight });
 })();
 </script>

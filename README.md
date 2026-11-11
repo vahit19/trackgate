@@ -2,6 +2,8 @@
 
 **Acceptance tests for sports tracking data, before it is trusted for officiating, betting or broadcast.**
 
+**Open the app:** [vahit19.github.io/trackgate](https://vahit19.github.io/trackgate/) (mirror: [vahitferyad.com/trackgate](https://vahitferyad.com/trackgate/)). Overview, games, a review queue where a person records which feed is right, acceptance gates, reports, and an AI analyst that works the app through its own tools.
+
 On 455,579 player positions from 10 games of the 2022 FIFA World Cup, two commercial tracking providers (PFF FC
 broadcast tracking and StatsBomb 360) put the same player at the same moment **more than 5 m apart 13.1% of the
 time**, and **48.8% of the time when PFF flags the position as estimated** while the player is on screen. With every
