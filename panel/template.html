@@ -969,16 +969,20 @@ const DATA = /*DATA*/null;
   const start = location.hash.replace(/^#\/?/, "");
   go(VIEWS[start] ? start : "dashboard", true);
   const offline = () => { $("agentState").textContent = "Offline right now · the rest of the app works"; setBusy(false); };
+  // ?ask=... (a link from an email or a page) opens the analyst and asks that question once the agent is online
+  let deepAsk = "";
+  try { const u = new URL(location.href); deepAsk = (u.searchParams.get("ask") || "").trim().slice(0, 300); if (deepAsk) { u.searchParams.delete("ask"); history.replaceState(null, "", u.pathname + (u.search || "") + u.hash); } } catch (e) {}
+  const runDeepAsk = () => { if (!deepAsk) return; const q = deepAsk; deepAsk = ""; openCop(); setTimeout(() => ask(q), 400); };
   if (inClaude) {
     window.claude.use("sample").then(async (s) => {
       const lim = s ? await s.limits().catch(() => null) : null;
       if (!s || !lim || !lim.tools) return offline();
-      sampleFn = s; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false);
+      sampleFn = s; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false); runDeepAsk();
     }).catch(offline);
   } else {
     fetch(API + "health", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((h) => {
       if (!h || !h.ok) return offline();
-      sampleFn = serverSample; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false);
+      sampleFn = serverSample; $("agentState").textContent = "Online · uses the app's tools"; setBusy(false); runDeepAsk();
     }).catch(offline);
   }
   track("load", { view: st.view, ref: String(document.referrer || "").slice(0, 300), w: innerWidth, h: innerHeight });
