@@ -6,7 +6,7 @@ HOST=${HOST:-root@116.203.228.141}
 KEY=${KEY:-$HOME/.ssh/id_ed25519_nader}
 ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes "$HOST" "python3 - ${1:-7}" <<'PY'
 import collections, datetime, json, sys
-days = int(sys.argv[1]); since = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).strftime("%Y-%m-%dT")
+days = int(sys.argv[1]); since = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).strftime("%Y-%m-%dT")
 ev = [json.loads(l) for l in open("/opt/trackgate/data/events.jsonl", encoding="utf-8") if l.strip()]
 ev = [e for e in ev if e["t"] >= since]
 loads = [e for e in ev if e["kind"] == "load"]

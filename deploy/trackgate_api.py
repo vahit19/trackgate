@@ -93,7 +93,7 @@ class Handler(BaseHTTPRequestHandler):
         kind = str(b.get("type", ""))
         if kind not in EVENTS:
             return self.reply(400, {"error": "unknown event"})
-        keep = {k: (v[:500] if isinstance(v, str) else v) for k, v in b.items() if k in ("sid", "view", "detail", "ref", "w", "h", "q", "code", "ms", "tools")}
+        keep = {k: (v[:500] if isinstance(v, str) else v) for k, v in b.items() if k in ("sid", "host", "view", "detail", "ref", "w", "h", "q", "code", "ms", "tools")}
         self.record(kind, **keep)
         self.reply(200, {"ok": True})
 
