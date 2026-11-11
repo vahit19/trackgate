@@ -1,0 +1,8 @@
+data/
+__pycache__/
+*.pyc
+*.part
+results_run.log
+.env
+run_*.log
+triage_*.log

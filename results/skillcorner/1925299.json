@@ -1,0 +1,279 @@
+{
+ "match": "Brisbane Roar FC v Perth Glory Football Club",
+ "date": "2024-12-21",
+ "tracking": {
+  "player_frames": 1054724,
+  "detected_share": 0.5787836438727099,
+  "checks": {
+   "off_pitch": {
+    "count": 151,
+    "of": 1054724,
+    "rate": 0.0001431654157864996,
+    "lo95": 0.0001220799894009567,
+    "hi95": 0.00016789206588872324,
+    "count_detected": 0,
+    "count_extrapolated": 151,
+    "examples": [
+     {
+      "frame": 1601,
+      "player_id": 560987,
+      "x": 26.31,
+      "y": -39.04
+     },
+     {
+      "frame": 1602,
+      "player_id": 560987,
+      "x": 26.23,
+      "y": -39.26
+     },
+     {
+      "frame": 1603,
+      "player_id": 560987,
+      "x": 26.13,
+      "y": -39.43
+     },
+     {
+      "frame": 1604,
+      "player_id": 560987,
+      "x": 26.04,
+      "y": -39.54
+     },
+     {
+      "frame": 1605,
+      "player_id": 560987,
+      "x": 25.96,
+      "y": -39.64
+     }
+    ]
+   },
+   "speed": {
+    "count": 0,
+    "of": 1053558,
+    "rate": 0.0,
+    "lo95": 2.117582368135751e-22,
+    "hi95": 3.646297586258366e-06,
+    "count_detected": 0,
+    "count_extrapolated": 0,
+    "examples": []
+   },
+   "teleport": {
+    "count": 0,
+    "of": 1053558,
+    "rate": 0.0,
+    "lo95": 2.117582368135751e-22,
+    "hi95": 3.646297586258366e-06,
+    "count_detected": 0,
+    "count_extrapolated": 0,
+    "examples": []
+   },
+   "accel": {
+    "count": 50,
+    "of": 1052392,
+    "rate": 4.751081346114376e-05,
+    "lo95": 3.604096497041023e-05,
+    "hi95": 6.263065258570385e-05,
+    "count_detected": 32,
+    "count_extrapolated": 18,
+    "examples": [
+     {
+      "frame": 18,
+      "player_id": 795537,
+      "m_per_s2": 12.4
+     },
+     {
+      "frame": 5054,
+      "player_id": 966112,
+      "m_per_s2": 12.7
+     },
+     {
+      "frame": 8030,
+      "player_id": 560984,
+      "m_per_s2": 20.6
+     },
+     {
+      "frame": 11854,
+      "player_id": 11897,
+      "m_per_s2": 15.0
+     },
+     {
+      "frame": 15243,
+      "player_id": 51043,
+      "m_per_s2": 12.1
+     }
+    ]
+   }
+  }
+ },
+ "pose": {
+  "pose_frames": 153252,
+  "player_frames_with_joints": 1540715,
+  "players": 32,
+  "bones": [
+   {
+    "bone": "lShoulder-lElbow",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.1054694652557373,
+    "p90_dev_cm": 2.78099924325943,
+    "claimed_p90_bound_cm": 10.234930038452148,
+    "share_beyond_claimed": 0.004108482100842791,
+    "p90_over_claimed": 0.27171648783248614
+   },
+   {
+    "bone": "rShoulder-rElbow",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.0910183191299438,
+    "p90_dev_cm": 2.7654051780700684,
+    "claimed_p90_bound_cm": 10.538012504577637,
+    "share_beyond_claimed": 0.004003985162732887,
+    "p90_over_claimed": 0.26242189187655607
+   },
+   {
+    "bone": "lElbow-lWrist",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.4709815382957458,
+    "p90_dev_cm": 3.7534567713737492,
+    "claimed_p90_bound_cm": 15.865008354187012,
+    "share_beyond_claimed": 0.0027266561304329483,
+    "p90_over_claimed": 0.23658712857741143
+   },
+   {
+    "bone": "rElbow-rWrist",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.4849230647087097,
+    "p90_dev_cm": 3.7235125899314903,
+    "claimed_p90_bound_cm": 16.366572380065918,
+    "share_beyond_claimed": 0.0026539626082695373,
+    "p90_over_claimed": 0.22750717153621225
+   },
+   {
+    "bone": "lHip-lKnee",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.3227254152297974,
+    "p90_dev_cm": 3.4501492977142347,
+    "claimed_p90_bound_cm": 13.373933792114258,
+    "share_beyond_claimed": 0.002778580074835385,
+    "p90_over_claimed": 0.2579756525898584
+   },
+   {
+    "bone": "rHip-rKnee",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.295289397239685,
+    "p90_dev_cm": 3.392544388771057,
+    "claimed_p90_bound_cm": 13.341997623443604,
+    "share_beyond_claimed": 0.0027850705678856896,
+    "p90_over_claimed": 0.254275595343378
+   },
+   {
+    "bone": "lKnee-lAnkle",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.3601675629615784,
+    "p90_dev_cm": 3.937519490718843,
+    "claimed_p90_bound_cm": 16.832332611083984,
+    "share_beyond_claimed": 0.0037248939615697908,
+    "p90_over_claimed": 0.23392595558181944
+   },
+   {
+    "bone": "rKnee-rAnkle",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 1.35880708694458,
+    "p90_dev_cm": 3.959988355636597,
+    "claimed_p90_bound_cm": 16.960521697998047,
+    "share_beyond_claimed": 0.0035957331498687297,
+    "p90_over_claimed": 0.23348269741631936
+   },
+   {
+    "bone": "lShoulder-rShoulder",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 0.9252727031707764,
+    "p90_dev_cm": 2.4572342634201063,
+    "claimed_p90_bound_cm": 8.110517501831055,
+    "share_beyond_claimed": 0.007444595528699338,
+    "p90_over_claimed": 0.3029688626977691
+   },
+   {
+    "bone": "lHip-rHip",
+    "players": 32,
+    "samples": 1540715,
+    "p50_dev_cm": 0.5302280187606812,
+    "p90_dev_cm": 1.4110147953033447,
+    "claimed_p90_bound_cm": 11.561544418334961,
+    "share_beyond_claimed": 0.0018738053436229284,
+    "p90_over_claimed": 0.12204379832383608
+   }
+  ],
+  "left_right_median_gap": [
+   {
+    "pair": "Shoulder-Elbow",
+    "players": 32,
+    "median_cm": 0.07899552583694458,
+    "max_cm": 0.3291472792625427
+   },
+   {
+    "pair": "Elbow-Wrist",
+    "players": 32,
+    "median_cm": 0.07657147943973541,
+    "max_cm": 0.5371049046516418
+   },
+   {
+    "pair": "Hip-Knee",
+    "players": 32,
+    "median_cm": 0.27319639921188354,
+    "max_cm": 0.4103928804397583
+   },
+   {
+    "pair": "Knee-Ankle",
+    "players": 32,
+    "median_cm": 0.0978231430053711,
+    "max_cm": 0.353926420211792
+   }
+  ],
+  "impossible_joint_speed": {
+   "count": 1052,
+   "of": 6139528,
+   "rate": 0.00017134867696669842,
+   "lo95": 0.00016130309952118343,
+   "hi95": 0.0001820197554427357,
+   "examples": [
+    {
+     "t": 1.92,
+     "player_id": 795537,
+     "joint": "lAnkle",
+     "m_per_s": 37.2
+    },
+    {
+     "t": 1.92,
+     "player_id": 795537,
+     "joint": "rAnkle",
+     "m_per_s": 38.6
+    },
+    {
+     "t": 1.96,
+     "player_id": 795537,
+     "joint": "lAnkle",
+     "m_per_s": 35.0
+    },
+    {
+     "t": 1.96,
+     "player_id": 795537,
+     "joint": "rAnkle",
+     "m_per_s": 36.2
+    },
+    {
+     "t": 2.44,
+     "player_id": 795537,
+     "joint": "lAnkle",
+     "m_per_s": 40.1
+    }
+   ]
+  }
+ }
+}

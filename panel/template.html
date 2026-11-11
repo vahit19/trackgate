@@ -1,0 +1,588 @@
+<title>TrackGate</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: broadcast operations console under floodlights. Sticky side rail; status bar; scoreboard KPIs beside a live pitch overlay; gate band; game board and game detail; review queue driving the pitch; analyst; deployment. */
+:root {
+  color-scheme: dark;
+  --bg: #05080c;
+  --bg2: #0a1118;
+  --rail: rgba(8, 14, 20, 0.82);
+  --glass: rgba(140, 186, 212, 0.055);
+  --glass2: rgba(140, 186, 212, 0.095);
+  --line: rgba(150, 200, 228, 0.13);
+  --line2: rgba(150, 200, 228, 0.22);
+  --fg: #eaf2f7;
+  --muted: #92a6b3;
+  --dim: #5d7180;
+  --turf: #1fd29b;
+  --turf2: rgba(31, 210, 155, 0.14);
+  --ice: #6cc4ff;
+  --ice2: rgba(108, 196, 255, 0.14);
+  --amber: #ffb547;
+  --amber2: rgba(255, 181, 71, 0.15);
+  --red: #ff5a6a;
+  --red2: rgba(255, 90, 106, 0.15);
+  --pitchbg: #0b1f18;
+  --pitchline: rgba(210, 245, 230, 0.32);
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0; color: var(--fg); font: 14px/1.5 var(--body); background-color: var(--bg);
+  min-height: 100vh; position: relative; isolation: isolate;
+}
+/* Floodlit backdrop: coloured light pools + faint pitch markings, fixed behind the glass. */
+.backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: linear-gradient(160deg, #061018 0%, #04070b 55%, #070611 100%); }
+.backdrop .orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; }
+.backdrop .o1 { width: 620px; height: 620px; left: -160px; top: -220px; background: radial-gradient(circle, #1fd29b, transparent 65%); }
+.backdrop .o2 { width: 560px; height: 560px; right: -140px; top: -120px; background: radial-gradient(circle, #3d8bff, transparent 65%); opacity: .5; }
+.backdrop .o3 { width: 700px; height: 700px; left: 35%; top: 45%; background: radial-gradient(circle, #7b4dff, transparent 65%); opacity: .32; }
+.backdrop .o4 { width: 420px; height: 420px; right: 8%; bottom: -160px; background: radial-gradient(circle, #ffb547, transparent 65%); opacity: .22; }
+.backdrop svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .07; }
+.backdrop::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.55) 100%); }
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; padding: 20px 14px; padding-left: max(14px, env(safe-area-inset-left, 0px)); border-right: 1px solid rgba(255,255,255,0.10); background: rgba(6, 12, 18, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; flex-direction: column; gap: 22px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px; }
+.logo { width: 34px; height: 34px; border-radius: 9px; flex: none; background: radial-gradient(circle at 30% 30%, #5ff0c3, var(--turf) 45%, #0a6b51); box-shadow: 0 0 22px rgba(31, 210, 155, 0.45), inset 0 0 0 1px rgba(255,255,255,0.15); display: grid; place-items: center; }
+.logo svg { width: 20px; height: 20px; }
+.brand b { font: 800 22px/1 var(--display); letter-spacing: 0.08em; display: block; }
+.brand small { color: var(--dim); font: 500 10px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; }
+.nav { display: grid; gap: 2px; }
+.nav a { color: var(--muted); text-decoration: none; font: 500 13px var(--body); padding: 9px 10px; border-radius: 9px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
+.nav a:hover { color: var(--fg); background: var(--glass); }
+.nav a.on { color: var(--fg); background: var(--glass2); border-color: var(--line); }
+.nav a .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); }
+.nav a.on .dot { background: var(--turf); box-shadow: 0 0 8px var(--turf); }
+.railfoot { margin-top: auto; display: grid; gap: 8px; font-size: 12px; color: var(--dim); }
+.railfoot .src { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.sw { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.sw.sb { border: 2px solid var(--ice); }
+.sw.pf { background: var(--turf); }
+main { min-width: 0; padding-block: 0 56px; }
+.status { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px max(22px, env(safe-area-inset-right, 0px)) 12px 22px; background: rgba(5, 10, 16, 0.42); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.10); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.chip { font: 500 11px var(--mono); color: var(--muted); border: 1px solid var(--line); background: var(--glass); padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+.chip.live { color: var(--turf); border-color: rgba(31, 210, 155, 0.35); background: var(--turf2); }
+.chip.live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--turf); margin-right: 6px; box-shadow: 0 0 8px var(--turf); vertical-align: 1px; }
+.status .title { font: 600 15px var(--body); margin-right: auto; }
+.content > section, .content > div { scroll-margin-top: 72px; }
+.content { padding: 22px 22px 0; padding-right: max(22px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; max-width: 1320px; }
+.card { position: relative; background: linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%); min-width: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.25), 0 24px 48px -28px rgba(0,0,0,0.75); }
+.card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02) 40%, rgba(108,196,255,0.18)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.eyebrow { font: 600 11px var(--mono); color: var(--turf); letter-spacing: 0.14em; text-transform: uppercase; }
+h1 { margin: 0; font: 700 clamp(30px, 3.6vw, 46px)/1.02 var(--display); letter-spacing: 0.01em; text-wrap: balance; }
+h2 { margin: 0; font: 700 20px/1.1 var(--display); letter-spacing: 0.04em; text-transform: uppercase; }
+.sub { margin: 0; color: var(--muted); font-size: 13px; max-width: 75ch; }
+.overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; }
+.intro { padding: 22px; display: grid; gap: 14px; align-content: start; }
+.intro p { margin: 0; color: var(--muted); max-width: 62ch; }
+.board4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.kpi { position: relative; padding: 14px 14px 12px; border-radius: 12px; background: linear-gradient(180deg, var(--glass2), rgba(140,186,212,0.03)); border: 1px solid var(--line); overflow: hidden; }
+.kpi::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--k, var(--dim)); }
+.kpi .l { font: 600 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.kpi .v { font: 800 40px/1 var(--display); font-variant-numeric: tabular-nums; margin-top: 6px; color: var(--kv, var(--fg)); }
+.kpi .s { font-size: 12px; color: var(--dim); margin-top: 4px; }
+.pitchcard { padding: 16px; display: grid; gap: 10px; }
+.pitchhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.pitchhead .what { font: 600 14px var(--body); }
+.pitchhead .meta { font: 12px var(--mono); color: var(--muted); }
+.pitchwrap { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line2); background: radial-gradient(ellipse at center, #10291f, var(--pitchbg) 70%); }
+.pitchwrap svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
+.legend i { display: inline-block; vertical-align: -1px; margin-right: 6px; }
+.lg-sb { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ice); }
+.lg-pf { width: 10px; height: 10px; border-radius: 50%; background: var(--turf); }
+.lg-pe { width: 10px; height: 10px; border-radius: 50%; border: 2px dashed var(--amber); }
+.lg-ln { width: 18px; height: 2px; background: linear-gradient(90deg, var(--amber), var(--red)); }
+.gate { padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.ctrls { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line2); border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.25); }
+.seg button { background: transparent; color: var(--muted); border: 0; padding: 8px 13px; font: 600 13px var(--mono); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--turf2); color: var(--turf); }
+.slider { display: grid; gap: 4px; min-width: 230px; }
+.slider label { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.slider output { font: 700 13px var(--mono); color: var(--fg); }
+input[type=range] { width: 100%; accent-color: var(--turf); }
+.verdict { display: grid; justify-items: end; line-height: 1; }
+.verdict b { font: 800 34px var(--display); font-variant-numeric: tabular-nums; }
+.verdict span { font: 600 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.sec { padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.tablewrap { overflow-x: auto; margin: 0 -6px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th.r, td.r { text-align: right; }
+td { padding: 11px 6px; border-bottom: 1px solid rgba(150, 200, 228, 0.07); vertical-align: middle; }
+tbody tr { cursor: pointer; transition: background .15s; }
+tbody tr:hover { background: rgba(108, 196, 255, 0.05); }
+tbody tr[aria-selected="true"] { background: linear-gradient(90deg, rgba(31, 210, 155, 0.12), transparent); box-shadow: inset 3px 0 0 var(--turf); }
+tbody tr:focus-visible { outline: 2px solid var(--ice); outline-offset: -2px; }
+.gm { font-weight: 600; white-space: nowrap; }
+.gd { color: var(--dim); font: 11px var(--mono); }
+.mono { font: 13px var(--mono); white-space: nowrap; }
+.pill { display: inline-block; font: 700 10px var(--mono); letter-spacing: 0.1em; padding: 4px 8px; border-radius: 6px; }
+.pill.pass { background: var(--turf2); color: var(--turf); }
+.pill.fail { background: var(--red2); color: var(--red); }
+.barcell { display: grid; grid-template-columns: minmax(90px, 1fr) 46px; gap: 8px; align-items: center; }
+.bar { position: relative; height: 8px; border-radius: 6px; background: rgba(150, 200, 228, 0.09); }
+.bar .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, var(--amber), var(--red)); }
+.bar .ci { position: absolute; top: -3px; bottom: -3px; border-left: 1px solid rgba(234,242,247,0.7); border-right: 1px solid rgba(234,242,247,0.7); }
+.bar .gl { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--turf); box-shadow: 0 0 8px var(--turf); }
+.pct { font: 12px var(--mono); color: var(--muted); text-align: right; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fact { background: var(--glass2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.fact .l { font: 600 10px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.fact .v { font: 800 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.hist svg { display: block; width: 100%; height: auto; }
+.split { display: grid; gap: 10px; }
+.srow { display: grid; grid-template-columns: 116px minmax(0, 1fr) 56px; gap: 10px; align-items: center; font-size: 13px; }
+.srow .k { color: var(--muted); font: 12px var(--mono); }
+.note { font-size: 12px; color: var(--dim); margin: 0; }
+.queue { display: grid; gap: 8px; }
+.qi { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(5, 8, 12, 0.35); cursor: pointer; text-align: left; color: inherit; font: inherit; width: 100%; }
+.qi:hover { border-color: var(--line2); }
+.qi[aria-pressed="true"] { border-color: rgba(108, 196, 255, 0.55); background: var(--ice2); }
+.qi .clk { font: 700 13px var(--mono); color: var(--ice); }
+.qi .w { min-width: 0; }
+.qi .w b { display: block; font-weight: 600; }
+.qi .w span { color: var(--muted); font-size: 12px; }
+.qi a { color: #041019; background: var(--ice); text-decoration: none; font: 600 12px var(--body); padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.agent { padding: 18px; display: grid; gap: 12px; background: linear-gradient(135deg, rgba(31, 210, 155, 0.08), rgba(108, 196, 255, 0.05) 60%, var(--glass)); }
+.agenthead { display: flex; gap: 12px; align-items: center; }
+.bot { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(0,0,0,0.35); border: 1px solid var(--line2); }
+.qs { display: flex; flex-wrap: wrap; gap: 8px; }
+.qbtn { background: rgba(0,0,0,0.3); border: 1px solid var(--line2); color: var(--fg); border-radius: 999px; padding: 8px 13px; font: 500 13px var(--body); cursor: pointer; }
+.qbtn:hover { border-color: var(--turf); color: var(--turf); }
+.qbtn:disabled, .btn:disabled { opacity: .45; cursor: default; }
+.ask { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask input { flex: 1 1 260px; min-width: 0; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--line2); color: var(--fg); border-radius: 10px; padding: 11px 13px; font: 14px var(--body); }
+.btn { background: var(--turf); color: #03140e; border: 0; border-radius: 9px; padding: 9px 16px; font: 700 13px var(--body); cursor: pointer; }
+.btn.ghost { background: transparent; border: 1px solid var(--line2); color: var(--fg); }
+.answer { display: grid; gap: 10px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.35); }
+.trace { display: flex; flex-wrap: wrap; gap: 6px; }
+.trace span { font: 11px var(--mono); color: var(--ice); border: 1px solid rgba(108, 196, 255, 0.3); background: var(--ice2); border-radius: 6px; padding: 2px 7px; }
+.trace span::before { content: "→ "; opacity: .6; }
+.atext { white-space: pre-wrap; line-height: 1.65; max-width: 80ch; }
+.check { font: 12px var(--mono); }
+.check.ok { color: var(--turf); } .check.bad { color: var(--amber); }
+mark.unv { background: var(--amber2); color: var(--amber); border-radius: 3px; padding: 0 2px; }
+.launcher { position: fixed; z-index: 20; right: max(20px, calc(env(safe-area-inset-right, 0px) + 20px)); bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px)); display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); color: #03140e; background: linear-gradient(135deg, #5ff0c3, var(--turf)); font: 700 14px var(--body); cursor: pointer; box-shadow: 0 10px 30px -6px rgba(31, 210, 155, 0.55), 0 0 0 6px rgba(31, 210, 155, 0.12); }
+.launcher[aria-expanded="true"] { display: none; }
+.chat { position: fixed; z-index: 21; right: max(20px, calc(env(safe-area-inset-right, 0px) + 20px)); bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px)); width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100vh - 110px)); display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.16); background: linear-gradient(160deg, rgba(14, 26, 36, 0.78), rgba(8, 14, 22, 0.86)); backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%); box-shadow: 0 40px 80px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.12); }
+.chat[hidden] { display: none !important; }
+.chathead { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.09); }
+.chathead .who { display: grid; margin-right: auto; line-height: 1.25; }
+.chathead .who b { font: 600 14px var(--body); }
+.chathead .who span { font: 11px var(--mono); color: var(--muted); }
+.iconbtn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
+.iconbtn:hover { color: var(--fg); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+.msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 92%; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; flex: none; }
+.msg.user { align-self: flex-end; width: fit-content; }
+.msg.bot { align-self: flex-start; width: 92%; }
+.msg.bot .bub { justify-self: start; max-width: 100%; }
+.msg.user .bub { background: linear-gradient(135deg, rgba(31, 210, 155, 0.28), rgba(31, 210, 155, 0.16)); border: 1px solid rgba(31, 210, 155, 0.35); border-bottom-right-radius: 4px; }
+.msg.bot .bub { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-bottom-left-radius: 4px; }
+.bub { padding: 10px 12px; border-radius: 14px; white-space: pre-wrap; line-height: 1.55; font-size: 13.5px; overflow-wrap: anywhere; }
+.msg .meta { font: 11px var(--mono); }
+.msg .meta.ok { color: var(--turf); } .msg .meta.bad { color: var(--amber); }
+.typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+.typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+.welcome { color: var(--muted); font-size: 13px; padding: 4px 2px; }
+.chat .qs { padding: 0 14px 10px; }
+.chat .qbtn { font-size: 12.5px; padding: 7px 11px; }
+.composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.09); background: rgba(0,0,0,0.2); }
+.composer input { flex: 1; min-width: 0; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.14); color: var(--fg); border-radius: 12px; padding: 11px 12px; font: 14px var(--body); }
+.send { width: 42px; height: 42px; flex: none; border-radius: 12px; border: 0; background: var(--turf); color: #03140e; display: grid; place-items: center; cursor: pointer; }
+.send:disabled { opacity: .4; cursor: default; }
+@media (max-width: 520px) { .chat { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; } .launcher span { display: none; } }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.step { padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--glass2); display: grid; gap: 6px; align-content: start; }
+.step .n { font: 800 26px/1 var(--display); color: var(--turf); }
+.step b { font: 700 16px var(--display); letter-spacing: 0.04em; text-transform: uppercase; }
+.step p { margin: 0; color: var(--muted); font-size: 13px; }
+pre { margin: 0; padding: 12px 14px; border-radius: 10px; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--line); overflow-x: auto; font: 12px/1.7 var(--mono); color: #cfe6f3; }
+.contact { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.contact code { font: 13px var(--mono); background: rgba(0, 0, 0, 0.4); border: 1px solid var(--line2); padding: 7px 11px; border-radius: 8px; user-select: all; }
+.limits { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 13px; }
+a.src { color: var(--ice); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--ice); outline-offset: 2px; }
+footer { color: var(--dim); font-size: 12px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: space-between; padding: 4px 2px; }
+@media (max-width: 1100px) { .overview, .grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 860px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); gap: 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav { grid-auto-flow: column; overflow-x: auto; max-width: 100%; }
+  .railfoot { display: none; }
+  .status { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .content { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .gate { grid-template-columns: 1fr; } .verdict { justify-items: start; }
+}
+@media (max-width: 520px) { .board4, .facts { grid-template-columns: 1fr 1fr; } .kpi .v { font-size: 32px; } .qi { grid-template-columns: 54px minmax(0, 1fr); } .qi a { grid-column: 1 / -1; text-align: center; } .srow { grid-template-columns: 92px minmax(0, 1fr) 50px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div>
+  <svg viewBox="0 0 1050 680" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="#dff" stroke-width="2"><rect x="25" y="25" width="1000" height="630"/><line x1="525" y1="25" x2="525" y2="655"/><circle cx="525" cy="340" r="92"/><rect x="25" y="138" width="165" height="404"/><rect x="860" y="138" width="165" height="404"/><rect x="25" y="248" width="55" height="184"/><rect x="970" y="248" width="55" height="184"/></g></svg>
+</div>
+<div class="shell">
+  <aside class="rail" aria-label="Sections">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04130e" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 5v14M5 12h14"/></svg></div>
+      <div><b>TRACKGATE</b><small>tracking acceptance</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#overview" class="on"><span class="dot"></span>Overview</a>
+      <a href="#gate"><span class="dot"></span>Acceptance gate</a>
+      <a href="#games"><span class="dot"></span>Games</a>
+      <a href="#review"><span class="dot"></span>Review queue</a>
+      <a href="#analyst"><span class="dot"></span>AI analyst</a>
+      <a href="#deploy"><span class="dot"></span>Run on your data</a>
+    </nav>
+    <div class="railfoot">
+      <span class="src"><span class="sw pf"></span>PFF FC broadcast tracking</span>
+      <span class="src"><span class="sw sb"></span>StatsBomb 360 freeze frames</span>
+      <span>Neither is treated as ground truth.</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="status"><span class="title">FIFA World Cup 2022 · cross-source audit</span><span class="chip live">Run complete</span><span class="chip" id="stGames"></span><span class="chip" id="stPos"></span></div>
+    <div class="content">
+
+      <section class="overview" id="overview" aria-labelledby="h1">
+        <div class="card intro">
+          <span class="eyebrow">Acceptance test · player tracking</span>
+          <h1 id="h1">Same players, same moment, two providers, metres apart.</h1>
+          <p id="heroText"></p>
+          <div class="board4" id="kpis"></div>
+        </div>
+        <div class="card pitchcard" aria-labelledby="pitchTitle">
+          <div class="pitchhead"><span class="what" id="pitchTitle"></span><span class="meta" id="pitchMeta"></span></div>
+          <div class="pitchwrap" id="pitch"></div>
+          <div class="legend"><span><i class="lg-pf"></i>PFF position</span><span><i class="lg-pe"></i>PFF says estimated</span><span><i class="lg-sb"></i>StatsBomb position</span><span><i class="lg-ln"></i>gap between them</span></div>
+        </div>
+      </section>
+
+      <section class="card gate" id="gate" aria-labelledby="gateh">
+        <div><span class="eyebrow">Your pass mark</span><h2 id="gateh" style="margin-top:4px">Acceptance gate</h2><p class="sub" id="gateText"></p></div>
+        <div class="ctrls">
+          <div class="seg" role="group" aria-label="Distance that counts as far apart">
+            <button type="button" id="d2" data-d="2" aria-pressed="false">&gt; 2 m</button>
+            <button type="button" id="d5" data-d="5" aria-pressed="true">&gt; 5 m</button>
+          </div>
+          <div class="slider">
+            <label for="limit">Allowed share of positions <output id="limitOut" for="limit">5%</output></label>
+            <input type="range" id="limit" min="1" max="60" step="1" value="5">
+          </div>
+          <div class="verdict" aria-live="polite"><b id="passN"></b><span>games pass</span></div>
+        </div>
+      </section>
+
+      <div class="grid2" id="games">
+        <section class="card sec" aria-labelledby="boardh">
+          <div><h2 id="boardh">Games</h2><p class="sub">Share of positions far apart per game: bar with 95% interval, green line at your limit. Select a game for detail.</p></div>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>Game</th><th class="r">Positions</th><th class="r">Median gap</th><th>Far apart</th><th>Gate</th></tr></thead>
+              <tbody id="board"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="card sec" aria-labelledby="detailh">
+          <div><h2 id="detailh">Game detail</h2><p class="sub" id="detailSub"></p></div>
+          <div class="facts" id="facts"></div>
+          <div class="hist" id="hist" aria-label="Distribution of gaps"></div>
+          <div class="split" id="split"></div>
+          <p class="note" id="perspNote"></p>
+        </section>
+      </div>
+
+      <section class="card sec" id="review" aria-labelledby="reviewh">
+        <div><h2 id="reviewh">Review queue</h2><p class="sub">The moments where the sources disagree most. Select one to draw it on the pitch above; "Open video" jumps to that second in PFF's film room (PFF access required) so a person can decide which source is right.</p></div>
+        <div class="queue" id="queue"></div>
+      </section>
+
+      <section class="card agent" id="analyst" aria-labelledby="agenth">
+        <div class="agenthead"><div class="bot" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1fd29b" stroke-width="2" stroke-linecap="round"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg></div>
+          <div><h2 id="agenth">AI analyst</h2><p class="sub">An agent that works this run through the console's own tools, can switch the view for you, and is checked by code: every number in its answer is matched against the data before you see it.</p></div></div>
+        <div class="steps">
+          <div class="step"><span class="n">→</span><b>Uses the console's tools</b><p>Lists games, opens a game's detail, simulates any gate, and switches the view to show you what it found.</p></div>
+          <div class="step"><span class="n">✓</span><b>Checked by code</b><p>Every figure in an answer is matched against this run's data; anything it cannot find is highlighted as unverified.</p></div>
+          <div class="step"><span class="n">⇄</span><b>Keeps the thread</b><p>Ask follow-ups in the same conversation, from any section of the console.</p></div>
+        </div>
+        <div><button type="button" class="btn" id="openChat2">Open the analyst</button></div>
+      </section>
+
+      <section class="card sec" id="deploy" aria-labelledby="runh">
+        <div><h2 id="runh">Run it on your own feeds</h2><p class="sub">Optical vs chip, automated stats vs human operators, incumbent vendor vs challenger. It runs in Docker on your machine; nothing leaves your building.</p></div>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><b>Export two feeds</b><p>Any two sources of the same games, in metres from centre ice or the centre spot, with each provider's own quality flag.</p></div>
+          <div class="step"><span class="n">02</span><b>Run the audit</b><p>Orientation and clock offsets are fitted from the data. No calibration session, no manual labelling.</p></div>
+          <div class="step"><span class="n">03</span><b>Gate and review</b><p>Per game and per venue: pass or fail against your limit, with confidence intervals and a review queue linked to video.</p></div>
+        </div>
+        <pre>docker build -t trackgate .
+docker run --rm -v "$PWD/feeds:/data" trackgate compare \
+  --continuous /data/optical.jsonl.bz2 --snapshot-events /data/events.json \
+  --snapshot-frames /data/frames.json --home "Home Team" --out /data/report.json</pre>
+        <div class="contact"><span class="note">Pilot on your data:</span><code id="email">vahit.feryat@gmail.com</code><button class="btn" type="button" id="copyBtn">Copy email</button><span class="note" id="copyMsg" aria-live="polite"></span></div>
+      </section>
+
+      <section class="card sec" aria-labelledby="limh">
+        <h2 id="limh">How to read this</h2>
+        <ul class="limits">
+          <li>Neither provider is ground truth. When the two are metres apart, at least one of them is metres off; the review queue exists to settle which.</li>
+          <li>Every event is shifted within ±1 s to the moment the sources agree best, so the gaps shown are not clock artefacts.</li>
+          <li id="perspLimit"></li>
+          <li>StatsBomb 360 only records players visible in the broadcast frame, so "PFF: estimated" rows are players who were on screen while PFF estimated their position.</li>
+          <li>Data: <a class="src" href="https://github.com/statsbomb/open-data">StatsBomb open data</a> (events, 360 freeze frames) and the <a class="src" href="https://www.blog.fc.pff.com/blog/pff-fc-release-2022-world-cup-data">PFF FC 2022 World Cup dataset</a> (broadcast tracking). Data provided by StatsBomb.</li>
+        </ul>
+      </section>
+
+      <footer><span>TrackGate · Vahit Feryad, PhD · <a class="src" href="https://vahitferyad.com/">vahitferyad.com</a></span><span id="genTag"></span></footer>
+    </div>
+  </main>
+</div>
+
+<button type="button" class="launcher" id="launcher" aria-expanded="false" aria-controls="chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>Ask the analyst</span></button>
+<section class="chat" id="chat" aria-label="AI analyst chat" hidden>
+  <header class="chathead">
+    <div class="bot" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1fd29b" stroke-width="2" stroke-linecap="round"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg></div>
+    <div class="who"><b>TrackGate analyst</b><span id="agentState">Connecting…</span></div>
+    <button type="button" class="iconbtn" id="newChat" title="New conversation" aria-label="New conversation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button type="button" class="iconbtn" id="closeChat" aria-label="Close chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="msgs" id="msgs" aria-live="polite"></div>
+  <div class="qs" id="qs"></div>
+  <form id="askForm" class="composer" autocomplete="off">
+    <input id="askInput" type="text" maxlength="400" placeholder="Ask about this run…" aria-label="Message the analyst">
+    <button type="submit" class="send" id="askBtn" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6 3.3 10l12.5 2-12.5 2z"/></svg></button>
+    <button type="button" class="btn ghost" id="stopBtn" hidden>Stop</button>
+  </form>
+</section>
+
+<script>
+const DATA = /*DATA*/null;
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const pc = (x) => (100 * x).toFixed(1) + "%";
+  const nf = (n) => n.toLocaleString("en-US");
+  const games = DATA.games;
+  let dist = 5, limit = 0.05, sel = null, mom = 0;
+  try { const s = JSON.parse(localStorage.getItem("trackgate2") || "{}"); if (s.dist === 2 || s.dist === 5) dist = s.dist; if (s.limit >= 0.01 && s.limit <= 0.6) limit = s.limit; if (s.sel) sel = s.sel; } catch (e) {}
+  if (!games.some((g) => g.id === sel)) sel = games.slice().sort((a, b) => b.over5.rate - a.over5.rate)[0].id;
+  const G = () => games.find((g) => g.id === sel);
+  const share = (g) => (dist === 5 ? g.over5 : g.over2);
+  const save = () => { try { localStorage.setItem("trackgate2", JSON.stringify({ dist, limit, sel })); } catch (e) {} };
+  const clock = (sec) => `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+
+  // ----- static header numbers -----
+  const T = DATA.totals;
+  $("stGames").textContent = `${games.length} games`;
+  $("stPos").textContent = `${nf(T.n)} positions`;
+  $("heroText").textContent = `On every StatsBomb 360 freeze frame of ${games.length} World Cup games, PFF FC's broadcast tracking was laid over StatsBomb's player positions and each player was matched to themself. This is the check a league, broadcaster or sportsbook needs before tracking data drives officiating, betting lines or on-air graphics.`;
+  $("kpis").innerHTML = [
+    ["Positions compared", nf(T.n), "across all games", "var(--ice)", "var(--fg)"],
+    ["Typical gap", T.median_m.toFixed(1) + " m", "median of game medians", "var(--amber)", "var(--amber)"],
+    ["Apart > 5 m", pc(T.over5), "of all positions", "var(--red)", "var(--red)"],
+    ["> 5 m when PFF 'estimated'", pc(T.est_over5), "players on screen", "var(--red)", "var(--red)"],
+  ].map(([l, v, s, k, kv]) => `<div class="kpi" style="--k:${k};--kv:${kv}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+
+  // ----- pitch overlay -----
+  function pitchSVG(q) {
+    const L = 105, W = 68, pad = 3, X = (x) => (x + L / 2 + pad).toFixed(2), Y = (y) => (W / 2 - y + pad).toFixed(2);
+    const lc = "var(--pitchline)";
+    let s = `<svg viewBox="0 0 ${L + 2 * pad} ${W + 2 * pad}" role="img" aria-label="Pitch overlay of both sources">`;
+    for (let i = 0; i < 10; i++) if (i % 2 === 0) s += `<rect x="${pad + i * L / 10}" y="${pad}" width="${L / 10}" height="${W}" fill="rgba(255,255,255,0.025)"/>`;
+    s += `<g fill="none" stroke="${lc}" stroke-width="0.3"><rect x="${pad}" y="${pad}" width="${L}" height="${W}"/><line x1="${X(0)}" y1="${pad}" x2="${X(0)}" y2="${pad + W}"/><circle cx="${X(0)}" cy="${Y(0)}" r="9.15"/>`
+      + `<rect x="${pad}" y="${Y(20.16)}" width="16.5" height="40.32"/><rect x="${pad + L - 16.5}" y="${Y(20.16)}" width="16.5" height="40.32"/>`
+      + `<rect x="${pad}" y="${Y(9.16)}" width="5.5" height="18.32"/><rect x="${pad + L - 5.5}" y="${Y(9.16)}" width="5.5" height="18.32"/></g>`
+      + `<circle cx="${X(0)}" cy="${Y(0)}" r="0.4" fill="${lc}"/>`;
+    if (!q || !q.pairs || !q.pairs.length) return s + `<text x="${X(0)}" y="${Y(0) - 12}" fill="var(--muted)" font-size="3" text-anchor="middle">No positions stored for this moment</text></svg>`;
+    const col = (d) => (d > 5 ? "var(--red)" : d > 2 ? "var(--amber)" : "var(--turf)");
+    for (const [sx, sy, px, py] of q.pairs) { const d = Math.hypot(sx - px, sy - py); s += `<line x1="${X(sx)}" y1="${Y(sy)}" x2="${X(px)}" y2="${Y(py)}" stroke="${col(d)}" stroke-width="${d > 5 ? 0.55 : 0.35}" stroke-linecap="round" opacity="0.9"/>`; }
+    for (const [, , px, py, vis] of q.pairs) s += vis === "ESTIMATED" ? `<circle cx="${X(px)}" cy="${Y(py)}" r="1.05" fill="none" stroke="var(--amber)" stroke-width="0.35" stroke-dasharray="0.7 0.5"/>` : `<circle cx="${X(px)}" cy="${Y(py)}" r="1.05" fill="var(--turf)"/>`;
+    for (const [sx, sy] of q.pairs) s += `<circle cx="${X(sx)}" cy="${Y(sy)}" r="1.05" fill="none" stroke="var(--ice)" stroke-width="0.4"/>`;
+    return s + `</svg>`;
+  }
+  function drawPitch() {
+    const g = G(), q = g.queue[mom] || g.queue[0];
+    $("pitch").innerHTML = pitchSVG(q);
+    if (q) { $("pitchTitle").textContent = `${g.match} · ${q.period === 1 ? "1st" : "2nd"} half ${clock(q.statsbomb_t)} · ${q.event.replace("*", "")}`; $("pitchMeta").textContent = `median gap ${q.median_m.toFixed(1)} m · worst ${q.max_m.toFixed(1)} m`; }
+    else { $("pitchTitle").textContent = g.match; $("pitchMeta").textContent = ""; }
+  }
+
+  // ----- gate + board -----
+  function board() {
+    const maxS = Math.max(...games.map((g) => share(g).hi95), limit) * 1.06;
+    const w = (x) => Math.min(100, (100 * x) / maxS).toFixed(2) + "%";
+    $("board").innerHTML = games.slice().sort((a, b) => share(b).rate - share(a).rate).map((g) => {
+      const s = share(g), ok = s.rate <= limit;
+      return `<tr tabindex="0" data-id="${g.id}" aria-selected="${g.id === sel}"><td><div class="gm">${g.match}</div><div class="gd">${g.date}</div></td>
+        <td class="r mono">${nf(g.n)}</td><td class="r mono">${g.median_m.toFixed(2)} m</td>
+        <td><div class="barcell"><div class="bar" title="${pc(s.rate)} (95% CI ${pc(s.lo95)}–${pc(s.hi95)})"><div class="fill" style="width:${w(s.rate)}"></div><div class="ci" style="left:${w(s.lo95)};width:calc(${w(s.hi95)} - ${w(s.lo95)})"></div><div class="gl" style="left:${w(limit)}"></div></div><span class="pct">${pc(s.rate)}</span></div></td>
+        <td><span class="pill ${ok ? "pass" : "fail"}">${ok ? "PASS" : "FAIL"}</span></td></tr>`;
+    }).join("");
+    const n = games.filter((g) => share(g).rate <= limit).length;
+    $("passN").innerHTML = `<span style="color:var(${n ? "--turf" : "--red"})">${n}</span><span style="color:var(--dim)"> / ${games.length}</span>`;
+    $("gateText").textContent = `A game passes when no more than ${Math.round(limit * 100)}% of player positions are placed more than ${dist} m apart by the two sources.`;
+    $("limitOut").textContent = Math.round(limit * 100) + "%"; $("limit").value = Math.round(limit * 100);
+    $("d2").setAttribute("aria-pressed", String(dist === 2)); $("d5").setAttribute("aria-pressed", String(dist === 5));
+  }
+
+  // ----- detail -----
+  function histSVG(h) {
+    if (!h || !h.length) return "";
+    const W = 420, H = 120, pl = 30, pb = 22, n = h.length, bw = (W - pl - 6) / n, tot = h.reduce((a, b) => a + b, 0), mx = Math.max(...h) / tot;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Histogram of gaps in metres">`;
+    for (let k = 0; k <= 2; k++) { const y = 6 + (H - pb - 6) * (1 - k / 2); s += `<line x1="${pl}" x2="${W - 6}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl - 4}" y="${y + 3}" fill="var(--dim)" font-size="9" text-anchor="end" font-family="var(--mono)">${(100 * mx * k / 2).toFixed(0)}%</text>`; }
+    h.forEach((c, i) => { const v = c / tot, bh = (H - pb - 6) * (v / mx), x = pl + i * bw, lo = i * 0.5;
+      const f = lo >= dist ? "var(--red)" : lo >= 2 ? "var(--amber)" : "var(--turf)";
+      s += `<rect x="${(x + 1).toFixed(1)}" y="${(H - pb - bh).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="${f}" opacity="0.85"><title>${i < n - 1 ? lo.toFixed(1) + "–" + (lo + 0.5).toFixed(1) : "10+"} m: ${(100 * v).toFixed(1)}%</title></rect>`; });
+    [0, 2, 5, 10].forEach((m) => { const x = pl + (m / 0.5) * bw; s += `<text x="${x}" y="${H - 6}" fill="var(--muted)" font-size="9" text-anchor="middle" font-family="var(--mono)">${m === 10 ? "10+ m" : m + " m"}</text>`; });
+    const gx = pl + (dist / 0.5) * bw; s += `<line x1="${gx}" x2="${gx}" y1="4" y2="${H - pb}" stroke="var(--fg)" stroke-dasharray="3 3" opacity="0.6"/>`;
+    return s + `</svg>`;
+  }
+  function detail() {
+    const g = G();
+    $("detailSub").textContent = `${g.match} · ${g.date} · ${nf(g.events)} freeze frames · ${nf(g.n)} positions`;
+    $("facts").innerHTML = [["Median gap", g.median_m.toFixed(2) + " m"], ["90th percentile", g.p90_m.toFixed(1) + " m"], ["Apart > " + dist + " m", pc(share(g).rate)]].map(([l, v]) => `<div class="fact"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
+    $("hist").innerHTML = histSVG(g.hist);
+    const rows = [["PFF: visible", g.vis], ["PFF: estimated", g.est]].filter(([, v]) => v && v.n);
+    const mx = Math.max(...rows.map(([, v]) => (dist === 5 ? v.over5 : v.over2).hi95)) * 1.08, w = (x) => ((100 * x) / mx).toFixed(2) + "%";
+    $("split").innerHTML = `<p class="note">Share apart by more than ${dist} m, by PFF's own quality flag</p>` + rows.map(([k, v]) => { const s = dist === 5 ? v.over5 : v.over2;
+      return `<div class="srow"><span class="k">${k}</span><div class="bar"><div class="fill" style="width:${w(s.rate)}"></div><div class="ci" style="left:${w(s.lo95)};width:calc(${w(s.hi95)} - ${w(s.lo95)})"></div></div><span class="pct">${pc(s.rate)}</span></div>`; }).join("")
+      + `<p class="note">${nf(g.est ? g.est.n : 0)} estimated vs ${nf(g.vis ? g.vis.n : 0)} visible positions</p>`;
+    const p = g.perspective || {}, tot = (p.event_team || 0) + (p.other_team || 0);
+    $("perspNote").textContent = tot ? `${nf(p.other_team || 0)} of ${nf(tot)} freeze frames (${pc((p.other_team || 0) / tot)}) were read from the other team's perspective, as StatsBomb records some duels and fouls.` : "";
+  }
+  function queue() {
+    const g = G();
+    $("queue").innerHTML = g.queue.length ? g.queue.map((q, i) => `<button type="button" class="qi" data-i="${i}" aria-pressed="${i === mom}"><span class="clk">${q.period === 1 ? "1H" : "2H"} ${clock(q.statsbomb_t)}</span>
+      <span class="w"><b>${q.event.replace("*", "")} · median gap ${q.median_m.toFixed(1)} m</b><span>worst player ${q.max_m.toFixed(1)} m apart · ${q.estimated_players} of ${q.players} marked estimated by PFF</span></span>
+      ${q.video ? `<a href="${q.video}" target="_blank" rel="noopener" data-video="1">Open video</a>` : ""}</button>`).join("") : `<p class="note">No moments to review.</p>`;
+  }
+  function render() { board(); detail(); queue(); drawPitch(); save(); }
+
+  $("board").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr) { sel = tr.dataset.id; mom = 0; render(); } });
+  $("board").addEventListener("keydown", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); sel = tr.dataset.id; mom = 0; render(); const again = $("board").querySelector(`tr[data-id="${sel}"]`); again && again.focus(); } });
+  $("queue").addEventListener("click", (e) => { if (e.target.closest("a[data-video]")) return; const b = e.target.closest(".qi"); if (b) { mom = Number(b.dataset.i); queue(); drawPitch(); $("overview").scrollIntoView({ behavior: "smooth", block: "start" }); } });
+  $("limit").addEventListener("input", (e) => { limit = Number(e.target.value) / 100; board(); save(); });
+  ["d2", "d5"].forEach((id) => $(id).addEventListener("click", () => { dist = Number($(id).dataset.d); render(); }));
+  $("copyBtn").addEventListener("click", () => {
+    const ok = () => { $("copyMsg").textContent = "Copied"; setTimeout(() => ($("copyMsg").textContent = ""), 1800); };
+    const fb = () => { const r = document.createRange(); r.selectNodeContents($("email")); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); $("copyMsg").textContent = "Selected, press Ctrl+C"; };
+    try { navigator.clipboard.writeText($("email").textContent).then(ok, fb); } catch (e) { fb(); }
+  });
+  // highlight the section in view
+  const links = [...document.querySelectorAll("#nav a")];
+  const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => { es.forEach((en) => { if (en.isIntersecting) links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + en.target.id)); }); }, { rootMargin: "-40% 0px -55% 0px" }) : null;
+  if (io) ["overview", "gate", "games", "review", "analyst", "deploy"].forEach((id) => $(id) && io.observe($(id)));
+  links.forEach((a) => a.addEventListener("click", () => links.forEach((b) => b.classList.toggle("on", b === a))));
+
+  const P = T.perspective;
+  $("perspLimit").textContent = `${pc(P.other_team / (P.other_team + P.event_team))} of StatsBomb freeze frames are recorded from the other team's perspective (pitch rotated, teammates swapped). Both readings are tried for every frame and the better one is used; the count is shown per game.`;
+  $("genTag").textContent = `Run generated ${DATA.generated}`;
+  render();
+
+  // ---------- AI analyst ----------
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const gv = (g) => ({ id: g.id, game: g.match, date: g.date, positions: g.n, median_gap_m: r1(g.median_m), p90_gap_m: r1(g.p90_m),
+    pct_over_2m: r1(100 * g.over2.rate), pct_over_5m: r1(100 * g.over5.rate), pct_over_5m_ci95: [r1(100 * g.over5.lo95), r1(100 * g.over5.hi95)],
+    pff_visible: g.vis ? { positions: g.vis.n, pct_over_5m: r1(100 * g.vis.over5.rate), pct_over_2m: r1(100 * g.vis.over2.rate) } : null,
+    pff_estimated: g.est ? { positions: g.est.n, pct_over_5m: r1(100 * g.est.over5.rate), pct_over_2m: r1(100 * g.est.over2.rate) } : null });
+  const tools = [
+    { name: "list_games", description: "Every game in this run: positions compared, median and 90th-percentile gap in metres, percent of positions more than 2 m and 5 m apart (95% interval).", execute: () => games.map(gv) },
+    { name: "game_detail", description: "One game's figures split by PFF's quality flag (visible vs estimated) and its worst review moments. Input: game id from list_games.",
+      inputSchema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
+      execute: (i) => { const g = games.find((x) => x.id === String(i.id)); if (!g) throw new Error("unknown game id"); return { ...gv(g), worst_moments: g.queue.slice(0, 5).map((q) => ({ half: q.period, minute: Math.floor(q.statsbomb_t / 60), event: q.event, median_gap_m: r1(q.median_m), worst_player_gap_m: r1(q.max_m), estimated_players: q.estimated_players, players: q.players })) }; } },
+    { name: "simulate_gate", description: "Which games pass a gate: a game passes when at most limit_percent of positions are more than distance_m apart (2 or 5). Optional flag VISIBLE or ESTIMATED restricts to positions with that PFF flag.",
+      inputSchema: { type: "object", properties: { distance_m: { type: "number", enum: [2, 5] }, limit_percent: { type: "number" }, flag: { type: "string", enum: ["ALL", "VISIBLE", "ESTIMATED"] } }, required: ["distance_m", "limit_percent"] },
+      execute: (i) => { const d = Number(i.distance_m) === 2 ? 2 : 5, lim = Number(i.limit_percent); if (!(lim >= 0 && lim <= 100)) throw new Error("limit_percent must be 0-100");
+        const f = String(i.flag || "ALL"); const pick = (g) => { const b = f === "VISIBLE" ? g.vis : f === "ESTIMATED" ? g.est : g; return b ? 100 * (d === 2 ? b.over2.rate : b.over5.rate) : null; };
+        const rows = games.map((g) => ({ game: g.match, pct: pick(g) })).filter((x) => x.pct !== null).map((x) => ({ game: x.game, pct_over: r1(x.pct), pass: x.pct <= lim }));
+        return { distance_m: d, limit_percent: lim, flag: f, passing: rows.filter((x) => x.pass).length, of: rows.length, games: rows }; } },
+    { name: "show_in_console", description: "Changes what the viewer sees: selects a game (id) and/or sets the gate (distance_m 2 or 5, limit_percent 1-60). Call it when the answer points at a specific game or gate.",
+      inputSchema: { type: "object", properties: { id: { type: "string" }, distance_m: { type: "number", enum: [2, 5] }, limit_percent: { type: "number" } } },
+      execute: (i) => { if (i.id && games.some((g) => g.id === String(i.id))) { sel = String(i.id); mom = 0; } if (Number(i.distance_m) === 2 || Number(i.distance_m) === 5) dist = Number(i.distance_m);
+        const l = Number(i.limit_percent); if (l >= 1 && l <= 60) limit = l / 100; render(); return { shown: true, game: G().match, distance_m: dist, limit_percent: Math.round(limit * 100), games_passing: games.filter((g) => share(g).rate <= limit).length }; } },
+  ];
+  function allowed(extra) {
+    const acc = new Set([1, 2, 5, 10, 90, 95, 100, 2022, games.length]);
+    const walk = (v) => { if (typeof v === "number" && isFinite(v)) { [v, r1(v), Math.round(v)].forEach((z) => acc.add(z)); if (v <= 1) { acc.add(r1(100 * v)); acc.add(Math.round(100 * v)); } } else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === "object") Object.values(v).forEach(walk); };
+    walk({ totals: DATA.totals, games: games.map(gv) }); extra.forEach(walk); return [...acc];
+  }
+  function checkNums(text, extra) {
+    const ok = allowed(extra), bad = [], re = /(?<![\w.])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(?![\w.])/g; let m, n = 0;
+    while ((m = re.exec(text))) { n++; const x = Number(m[1].replace(/,/g, "")); if (!ok.some((a) => Math.abs(a - x) <= Math.max(0.051, 0.006 * Math.abs(a)))) bad.push(m[1]); }
+    return { n, bad: [...new Set(bad)] };
+  }
+  const QS = ["Which game fails worst, and what drives it?", "Can PFF's 'estimated' positions be trusted for officiating?", "What limit would let 8 of the 10 games pass at 5 m?"];
+  $("qs").innerHTML = QS.map((q, i) => `<button type="button" class="qbtn" data-q="${i}">${q}</button>`).join("");
+  let sampleFn = null, ctl = null;
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  const LABEL = { list_games: "Reading all games", game_detail: "Opening game detail", simulate_gate: "Testing a gate", show_in_console: "Updating your view" };
+  let turns = [], working = false;
+  const RULES = () => `You are the analyst inside TrackGate, a console that tests whether two player-tracking sources agree. This run: ${games.length} games of the 2022 FIFA World Cup, PFF FC broadcast tracking compared with StatsBomb 360 freeze frames; neither source is ground truth. Rules: use the tools for every figure and never state a number you did not get from a tool. Reply in English, at most 70 words, in exactly three short lines: (1) the direct answer in one sentence, (2) the one or two figures that prove it, (3) "Recommendation:" followed by one practical step. Plain words for a league operations or broadcast data lead; no lists, no jargon, no caveats beyond one clause. When a specific game or gate answers the question, call show_in_console so the viewer sees it. The viewer's current view: distance ${dist} m, limit ${Math.round(limit * 100)}%, selected game ${G().match} (id ${sel}).`;
+  const scrollMsgs = () => { const m = $("msgs"); m.scrollTop = m.scrollHeight; };
+  function addMsg(role, html) { const d = document.createElement("div"); d.className = "msg " + role; d.innerHTML = `<div class="bub">${html}</div>`; $("msgs").append(d); scrollMsgs(); return d; }
+  function welcome() {
+    $("msgs").innerHTML = `<div class="welcome">Hi, I'm the TrackGate analyst. I read this run through the console's own tools, and every figure I give is checked against the data before you see it. Pick a question below or ask your own.</div>`;
+    $("qs").hidden = false;
+  }
+  function setBusy(b) { working = b; $("askBtn").disabled = b || !sampleFn; $("askInput").disabled = !sampleFn; $("stopBtn").hidden = !b; document.querySelectorAll(".qbtn").forEach((c) => (c.disabled = b || !sampleFn)); }
+  function openChat() { $("chat").hidden = false; $("launcher").setAttribute("aria-expanded", "true"); setTimeout(() => $("askInput").focus(), 50); }
+  function closeChat() { $("chat").hidden = true; $("launcher").setAttribute("aria-expanded", "false"); $("launcher").focus(); }
+
+  async function ask(q) {
+    q = String(q || "").trim(); if (!q || !sampleFn || working) return;
+    $("askInput").value = ""; $("qs").hidden = true;
+    addMsg("user", esc(q));
+    const bot = addMsg("bot", `<span class="typing" aria-label="Thinking"><i></i><i></i><i></i></span>`);
+    const bub = bot.querySelector(".bub");
+    const trace = document.createElement("div"); trace.className = "trace"; bot.prepend(trace);
+    const meta = document.createElement("div"); meta.className = "meta"; bot.append(meta);
+    setBusy(true);
+    const got = [];
+    const traced = tools.map((t) => ({ ...t, execute: async (i, c) => { const s = document.createElement("span"); s.textContent = LABEL[t.name] + (i && i.id ? " · " + (games.find((g) => g.id === String(i.id)) || {}).match : ""); trace.append(s); scrollMsgs(); const r = await t.execute(i || {}, c); got.push(r); return r; } }));
+    ctl = new AbortController();
+    const history = turns.slice(-8);
+    const input = [{ role: "user", content: RULES() }, ...history, { role: "user", content: q }];
+    try {
+      const { text } = await sampleFn(input, { tools: traced, modelTier: "quick", signal: ctl.signal, onText: ({ text }) => { bub.textContent = text; scrollMsgs(); } });
+      const c = checkNums(text, got);
+      if (c.bad.length) { let h = esc(text); c.bad.forEach((b) => { h = h.split(b).join(`<mark class="unv">${b}</mark>`); }); bub.innerHTML = h; meta.className = "meta bad"; meta.textContent = `Not found in the data: ${c.bad.join(", ")}. Treat highlighted figures as unverified.`; }
+      else { bub.textContent = text; meta.className = "meta ok"; meta.textContent = c.n ? `✓ ${c.n} figure${c.n === 1 ? "" : "s"} checked against the data` : "✓ No figures to check"; }
+      turns.push({ role: "user", content: q }, { role: "assistant", content: text });
+    } catch (e) {
+      const code = e && e.code;
+      const msg = { cancelled: "Stopped.", not_granted: "The analyst needs your permission to use Claude. Allow it in the prompt to continue.", rate_limited: "Too many questions at once. Try again in a minute.", tools_unavailable: "This viewer cannot run the analyst's tools.", session_expired: "Please sign in again to use the analyst.", sampling_disabled: "Claude is not available for this account." }[code] || "The analyst could not answer. Please try again.";
+      bub.textContent = (e && e.text) || msg; meta.className = "meta bad"; meta.textContent = e && e.text ? msg : "";
+      if (["not_granted", "sampling_disabled", "tools_unavailable", "not_declared", "capability_disabled"].includes(code)) { sampleFn = null; $("agentState").textContent = "Unavailable in this view"; }
+    } finally { setBusy(false); scrollMsgs(); }
+  }
+  $("qs").innerHTML = QS.map((q, i) => `<button type="button" class="qbtn" data-q="${i}">${q}</button>`).join("");
+  $("qs").addEventListener("click", (e) => { const b = e.target.closest(".qbtn"); if (b) ask(QS[Number(b.dataset.q)]); });
+  $("askForm").addEventListener("submit", (e) => { e.preventDefault(); ask($("askInput").value); });
+  $("stopBtn").addEventListener("click", () => ctl && ctl.abort());
+  $("launcher").addEventListener("click", openChat);
+  $("openChat2").addEventListener("click", openChat);
+  $("closeChat").addEventListener("click", closeChat);
+  $("newChat").addEventListener("click", () => { if (working && ctl) ctl.abort(); turns = []; welcome(); $("askInput").focus(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("chat").hidden) closeChat(); });
+  welcome(); setBusy(false);
+  (window.claude && window.claude.use ? window.claude.use("sample") : Promise.resolve(null)).then(async (s) => {
+    const lim = s ? await s.limits().catch(() => null) : null;
+    if (!s || !lim || !lim.tools) { $("agentState").textContent = "Available when opened in Claude"; setBusy(false); return; }
+    sampleFn = s; $("agentState").textContent = "Online · answers checked against data"; setBusy(false);
+  }).catch(() => { $("agentState").textContent = "Available when opened in Claude"; });
+})();
+</script>

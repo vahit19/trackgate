@@ -1,0 +1,1283 @@
+{
+ "pff_game_id": "3817",
+ "statsbomb_match_id": 3857254,
+ "match": "Denmark v Tunisia",
+ "date": "2022-11-22",
+ "events_with_360": 3161,
+ "alignment": {
+  "p1_home": {
+   "sx": 1,
+   "sy": 1,
+   "offset": -0.3999999999999968
+  },
+  "p1_away": {
+   "sx": -1,
+   "sy": -1,
+   "offset": -0.3999999999999968
+  },
+  "p2_home": {
+   "sx": -1,
+   "sy": -1,
+   "offset": -1.1999999999999975
+  },
+  "p2_away": {
+   "sx": 1,
+   "sy": 1,
+   "offset": -1.1999999999999975
+  }
+ },
+ "statsbomb_perspective": {
+  "event_team": 2934,
+  "other_team": 227
+ },
+ "summary": {
+  "all": {
+   "n": 37710,
+   "median_m": 3.054209962151031,
+   "p90_m": 8.000444396523598,
+   "share_over_1m": {
+    "rate": 0.8904534606205251,
+    "lo95": 0.8872612601814811,
+    "hi95": 0.8935661164705968
+   },
+   "share_over_2m": {
+    "rate": 0.690665605940069,
+    "lo95": 0.6859811218740203,
+    "hi95": 0.695311246920359
+   },
+   "share_over_5m": {
+    "rate": 0.2555820737204985,
+    "lo95": 0.25120460365362685,
+    "hi95": 0.2600093374899345
+   }
+  },
+  "by_pff_visibility": {
+   "VISIBLE": {
+    "n": 29967,
+    "median_m": 2.6795820258666825,
+    "p90_m": 6.007246089221611,
+    "share_over_1m": {
+     "rate": 0.8694897720826242,
+     "lo95": 0.8656282894953343,
+     "hi95": 0.8732565338123969
+    },
+    "share_over_2m": {
+     "rate": 0.6400707444856009,
+     "lo95": 0.6346186415962105,
+     "hi95": 0.6454869394229092
+    },
+    "share_over_5m": {
+     "rate": 0.1719891881069176,
+     "lo95": 0.16775859278746547,
+     "hi95": 0.17630387091058425
+    }
+   },
+   "ESTIMATED": {
+    "n": 7743,
+    "median_m": 5.8954269835612445,
+    "p90_m": 15.547415958542874,
+    "share_over_1m": {
+     "rate": 0.9715872400878213,
+     "lo95": 0.9676460887733429,
+     "hi95": 0.9750606783302984
+    },
+    "share_over_2m": {
+     "rate": 0.8864781092599767,
+     "lo95": 0.8792195842349084,
+     "hi95": 0.8933533311581208
+    },
+    "share_over_5m": {
+     "rate": 0.5791037065736795,
+     "lo95": 0.5680703154017436,
+     "hi95": 0.5900586438892274
+    }
+   }
+  },
+  "histogram_0_5m_bins": [
+   1151,
+   2980,
+   3748,
+   3786,
+   3449,
+   3415,
+   2992,
+   2503,
+   2196,
+   1852,
+   1601,
+   1241,
+   974,
+   807,
+   696,
+   546,
+   442,
+   343,
+   296,
+   219,
+   2473
+  ]
+ },
+ "triage_queue": [
+  {
+   "pairs": [
+    [
+     8.47,
+     7.45,
+     -12.8,
+     -7.29,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     6.65,
+     -13.25,
+     -13.0,
+     -13.53,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -1.2,
+     -34.17,
+     -10.67,
+     -26.45,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -3.59,
+     -6.75,
+     -5.37,
+     -7.18,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -4.41,
+     12.25,
+     -13.07,
+     0.98,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -5.08,
+     -33.91,
+     -25.0,
+     -24.07,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -10.87,
+     -25.88,
+     -17.87,
+     -13.84,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     7.26,
+     -11.98,
+     -25.38,
+     -8.24,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     3.45,
+     6.0,
+     -30.34,
+     -4.32,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -0.44,
+     -29.72,
+     -25.48,
+     -8.54,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -7.4,
+     -9.18,
+     -9.77,
+     -8.85,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -8.16,
+     -23.92,
+     -23.02,
+     -11.21,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -9.65,
+     5.95,
+     -25.53,
+     -0.85,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -13.61,
+     -31.62,
+     -23.47,
+     -21.67,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -16.68,
+     -23.63,
+     -25.82,
+     -18.57,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -19.86,
+     -5.66,
+     -19.87,
+     -6.26,
+     "ESTIMATED",
+     "away"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 2197.866,
+   "pff_period_t": 2195.67,
+   "event": "Pass",
+   "players": 16,
+   "median_m": 15.74,
+   "max_m": 35.34,
+   "estimated_players": 16,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5318.560"
+  },
+  {
+   "pairs": [
+    [
+     -34.1,
+     1.5,
+     -33.69,
+     -2.15,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -32.67,
+     -31.12,
+     -29.92,
+     -31.83,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -26.74,
+     -5.59,
+     -28.79,
+     -0.24,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -54.91,
+     -0.09,
+     -18.54,
+     -4.93,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -36.42,
+     -1.53,
+     -30.44,
+     -1.36,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     -36.04,
+     -8.81,
+     -14.56,
+     -8.76,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -33.68,
+     15.88,
+     -21.91,
+     14.86,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -33.34,
+     -29.24,
+     -28.22,
+     -33.55,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     -32.98,
+     2.22,
+     -2.13,
+     11.64,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -28.48,
+     -9.6,
+     -13.54,
+     -13.18,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -25.23,
+     0.24,
+     -8.95,
+     -3.61,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -24.98,
+     -19.14,
+     -2.73,
+     -20.26,
+     "ESTIMATED",
+     "away"
+    ]
+   ],
+   "period": 1,
+   "statsbomb_t": 630.0360000000001,
+   "pff_period_t": 630.64,
+   "event": "Dispossessed",
+   "players": 12,
+   "median_m": 13.59,
+   "max_m": 36.7,
+   "estimated_players": 7,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/731.074"
+  },
+  {
+   "pairs": [
+    [
+     -3.8,
+     0.31,
+     -0.71,
+     -0.8,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     5.25,
+     -0.08,
+     1.32,
+     -2.11,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     7.28,
+     -29.48,
+     19.2,
+     -21.11,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     12.91,
+     23.11,
+     7.24,
+     12.78,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     18.04,
+     -6.31,
+     24.65,
+     -2.79,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     18.23,
+     -9.73,
+     24.0,
+     -10.37,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -3.3,
+     -14.05,
+     3.58,
+     0.04,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     0.48,
+     -12.43,
+     12.38,
+     -16.82,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     1.57,
+     -22.49,
+     19.07,
+     -20.77,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     6.82,
+     -0.44,
+     8.3,
+     1.18,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     7.49,
+     -6.9,
+     22.05,
+     -4.43,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     17.1,
+     -12.35,
+     33.5,
+     -1.37,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     18.96,
+     10.25,
+     25.31,
+     19.91,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     20.25,
+     0.56,
+     22.81,
+     5.0,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     20.74,
+     -6.44,
+     25.04,
+     -3.06,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 1500.514,
+   "pff_period_t": 1498.41,
+   "event": "Pass",
+   "players": 15,
+   "median_m": 11.56,
+   "max_m": 19.74,
+   "estimated_players": 15,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/4621.300"
+  },
+  {
+   "pairs": [
+    [
+     48.01,
+     19.14,
+     42.3,
+     15.48,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     43.02,
+     -5.82,
+     41.15,
+     -2.73,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     41.39,
+     6.24,
+     35.42,
+     9.1,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     40.37,
+     -19.97,
+     38.1,
+     -10.16,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     26.57,
+     -6.19,
+     21.01,
+     -2.48,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     52.02,
+     -3.02,
+     38.78,
+     -2.02,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     47.86,
+     16.83,
+     42.92,
+     25.39,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     46.24,
+     8.47,
+     39.76,
+     15.53,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     44.88,
+     -7.1,
+     20.82,
+     0.48,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     42.86,
+     16.74,
+     22.38,
+     27.67,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     41.9,
+     -14.3,
+     36.7,
+     -15.53,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     40.42,
+     11.35,
+     9.74,
+     19.2,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     39.36,
+     2.64,
+     20.31,
+     14.52,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     35.04,
+     14.56,
+     21.2,
+     21.72,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     25.77,
+     -7.81,
+     5.59,
+     -9.23,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 1,
+   "statsbomb_t": 2150.499,
+   "pff_period_t": 2149.5,
+   "event": "Dribble",
+   "players": 15,
+   "median_m": 10.06,
+   "max_m": 31.68,
+   "estimated_players": 7,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/2249.934"
+  },
+  {
+   "pairs": [
+    [
+     46.55,
+     11.73,
+     45.63,
+     8.82,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     25.26,
+     6.03,
+     15.8,
+     8.55,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     30.48,
+     21.78,
+     14.48,
+     18.61,
+     "ESTIMATED",
+     "away"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 1884.521,
+   "pff_period_t": 1882.32,
+   "event": "Ball Receipt*",
+   "players": 3,
+   "median_m": 9.79,
+   "max_m": 16.31,
+   "estimated_players": 3,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5005.210"
+  },
+  {
+   "pairs": [
+    [
+     46.55,
+     11.73,
+     45.63,
+     8.82,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     25.26,
+     6.03,
+     15.8,
+     8.55,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     30.48,
+     21.78,
+     14.48,
+     18.61,
+     "ESTIMATED",
+     "away"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 1884.521,
+   "pff_period_t": 1882.32,
+   "event": "Carry",
+   "players": 3,
+   "median_m": 9.79,
+   "max_m": 16.31,
+   "estimated_players": 3,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5005.210"
+  },
+  {
+   "pairs": [
+    [
+     -14.01,
+     -29.38,
+     -9.35,
+     -22.86,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -13.13,
+     15.94,
+     -1.26,
+     8.18,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -11.41,
+     -28.98,
+     0.66,
+     -26.01,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -9.3,
+     -16.12,
+     -14.16,
+     -16.8,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -8.73,
+     1.98,
+     0.41,
+     4.91,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -22.38,
+     -6.1,
+     -2.32,
+     7.76,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -21.17,
+     -19.85,
+     10.7,
+     -18.77,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -15.58,
+     -27.48,
+     -13.83,
+     -29.97,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -12.5,
+     -24.49,
+     -3.44,
+     -23.64,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -10.98,
+     -11.2,
+     1.78,
+     -8.28,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -10.59,
+     -28.98,
+     -11.69,
+     -33.17,
+     "VISIBLE",
+     "home"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 2507.733,
+   "pff_period_t": 2507.53,
+   "event": "Foul Won",
+   "players": 11,
+   "median_m": 9.6,
+   "max_m": 31.89,
+   "estimated_players": 9,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5630.420"
+  },
+  {
+   "pairs": [
+    [
+     -22.38,
+     -6.1,
+     -36.94,
+     -5.14,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -21.17,
+     -19.85,
+     -13.53,
+     -16.62,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -15.58,
+     -27.48,
+     1.9,
+     -21.59,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -12.5,
+     -24.49,
+     -9.09,
+     -22.68,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -10.98,
+     -11.2,
+     -7.47,
+     -9.51,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -10.59,
+     -28.98,
+     1.13,
+     -25.98,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -14.01,
+     -29.38,
+     -11.66,
+     -31.23,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -13.13,
+     15.94,
+     -1.95,
+     8.45,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -11.41,
+     -28.98,
+     -10.72,
+     -33.06,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -9.3,
+     -16.12,
+     -3.33,
+     -23.51,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -8.73,
+     1.98,
+     1.99,
+     -7.82,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 2507.733,
+   "pff_period_t": 2506.93,
+   "event": "Foul Committed",
+   "players": 11,
+   "median_m": 9.5,
+   "max_m": 18.44,
+   "estimated_players": 9,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5629.820"
+  },
+  {
+   "pairs": [
+    [
+     41.72,
+     -10.18,
+     43.13,
+     -10.35,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     27.18,
+     -7.67,
+     35.83,
+     -4.04,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     47.04,
+     -5.3,
+     44.58,
+     -11.11,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     40.86,
+     -10.45,
+     15.45,
+     -17.98,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     39.25,
+     -9.65,
+     30.49,
+     -8.15,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     33.62,
+     -3.88,
+     9.58,
+     -6.75,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     32.53,
+     5.62,
+     22.27,
+     18.14,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 1,
+   "statsbomb_t": 1828.88,
+   "pff_period_t": 1829.08,
+   "event": "Dispossessed",
+   "players": 7,
+   "median_m": 9.39,
+   "max_m": 26.51,
+   "estimated_players": 3,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/1929.514"
+  },
+  {
+   "pairs": [
+    [
+     -19.33,
+     23.68,
+     -19.73,
+     25.03,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -18.97,
+     22.38,
+     -14.91,
+     25.5,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     -14.25,
+     26.12,
+     -14.41,
+     26.18,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -14.03,
+     8.77,
+     -15.67,
+     15.54,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -6.08,
+     -16.31,
+     -17.06,
+     -6.07,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     -26.64,
+     18.14,
+     3.26,
+     20.0,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -24.66,
+     8.47,
+     -13.06,
+     8.98,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     -21.12,
+     23.83,
+     -17.84,
+     23.3,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     -18.46,
+     23.97,
+     -12.76,
+     25.71,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -16.51,
+     -6.67,
+     -7.88,
+     -16.71,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     -15.52,
+     14.52,
+     5.12,
+     9.79,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     -13.8,
+     24.6,
+     -1.31,
+     28.04,
+     "ESTIMATED",
+     "away"
+    ]
+   ],
+   "period": 1,
+   "statsbomb_t": 116.61,
+   "pff_period_t": 116.61,
+   "event": "Foul Won",
+   "players": 12,
+   "median_m": 9.3,
+   "max_m": 29.96,
+   "estimated_players": 5,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/217.044"
+  },
+  {
+   "pairs": [
+    [
+     31.88,
+     -3.67,
+     31.07,
+     0.17,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     20.51,
+     -1.44,
+     25.16,
+     -9.18,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     18.78,
+     -3.39,
+     22.34,
+     -8.39,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     18.04,
+     36.41,
+     30.01,
+     13.84,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     7.43,
+     -14.72,
+     13.54,
+     -7.75,
+     "VISIBLE",
+     "away"
+    ],
+    [
+     30.84,
+     -3.02,
+     22.82,
+     -5.82,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     29.68,
+     -6.69,
+     24.84,
+     -28.09,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     28.6,
+     5.29,
+     0.72,
+     2.7,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     26.95,
+     17.98,
+     22.07,
+     29.11,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     25.3,
+     -6.36,
+     21.8,
+     -10.22,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     22.68,
+     -4.12,
+     20.68,
+     -6.11,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     21.0,
+     -0.08,
+     -1.32,
+     -16.85,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     20.63,
+     -17.82,
+     10.23,
+     -21.46,
+     "VISIBLE",
+     "home"
+    ],
+    [
+     10.44,
+     -2.06,
+     8.93,
+     -3.8,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     8.78,
+     9.75,
+     -0.67,
+     6.13,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 1,
+   "statsbomb_t": 2198.41,
+   "pff_period_t": 2198.61,
+   "event": "Dispossessed",
+   "players": 15,
+   "median_m": 9.27,
+   "max_m": 28.0,
+   "estimated_players": 6,
+   "perspective": "other_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/2299.044"
+  },
+  {
+   "pairs": [
+    [
+     23.27,
+     29.24,
+     12.96,
+     19.89,
+     "ESTIMATED",
+     "away"
+    ],
+    [
+     5.71,
+     26.37,
+     0.32,
+     23.37,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     17.31,
+     13.56,
+     15.13,
+     9.46,
+     "ESTIMATED",
+     "home"
+    ],
+    [
+     24.45,
+     36.0,
+     18.39,
+     25.29,
+     "ESTIMATED",
+     "home"
+    ]
+   ],
+   "period": 2,
+   "statsbomb_t": 1881.626,
+   "pff_period_t": 1881.43,
+   "event": "Pressure",
+   "players": 4,
+   "median_m": 9.24,
+   "max_m": 13.92,
+   "estimated_players": 4,
+   "perspective": "event_team",
+   "video": "https://epitome.pff.com/en/film_room/2ba4efe8-c940-46bc-b5af-5f051deafac3/5004.320"
+  }
+ ],
+ "seconds": 424.5
+}
