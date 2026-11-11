@@ -173,7 +173,7 @@ tbody tr:focus-visible { outline: 2px solid var(--ice); outline-offset: -2px; }
 mark.unv { background: var(--amber2); color: var(--amber); border-radius: 3px; padding: 0 2px; }
 .launcher { position: fixed; z-index: 20; right: max(20px, calc(env(safe-area-inset-right, 0px) + 20px)); bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px)); display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); color: #03140e; background: linear-gradient(135deg, #5ff0c3, var(--turf)); font: 700 14px var(--body); cursor: pointer; box-shadow: 0 10px 30px -6px rgba(31, 210, 155, 0.55), 0 0 0 6px rgba(31, 210, 155, 0.12); }
 .launcher[aria-expanded="true"] { display: none; }
-.chat { position: fixed; z-index: 21; right: max(20px, calc(env(safe-area-inset-right, 0px) + 20px)); bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px)); width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100vh - 110px)); display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.16); background: linear-gradient(160deg, rgba(14, 26, 36, 0.78), rgba(8, 14, 22, 0.86)); backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%); box-shadow: 0 40px 80px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.12); }
+.chat { position: fixed; z-index: 21; right: max(20px, calc(env(safe-area-inset-right, 0px) + 20px)); bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 20px)); width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100vh - 110px)); display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.16); background: linear-gradient(160deg, rgba(16, 30, 41, 0.97), rgba(8, 14, 22, 0.98)); box-shadow: 0 40px 80px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.12); }
 .chat[hidden] { display: none !important; }
 .chathead { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.09); }
 .chathead .who { display: grid; margin-right: auto; line-height: 1.25; }
@@ -181,16 +181,23 @@ mark.unv { background: var(--amber2); color: var(--amber); border-radius: 3px; p
 .chathead .who span { font: 11px var(--mono); color: var(--muted); }
 .iconbtn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
 .iconbtn:hover { color: var(--fg); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
-.msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-.msg { max-width: 92%; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; flex: none; }
-.msg.user { align-self: flex-end; width: fit-content; }
-.msg.bot { align-self: flex-start; width: 92%; }
-.msg.bot .bub { justify-self: start; max-width: 100%; }
-.msg.user .bub { background: linear-gradient(135deg, rgba(31, 210, 155, 0.28), rgba(31, 210, 155, 0.16)); border: 1px solid rgba(31, 210, 155, 0.35); border-bottom-right-radius: 4px; }
-.msg.bot .bub { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-bottom-left-radius: 4px; }
+/* Plain block flow for the message list: each message takes its full height, nothing overlaps. */
+.msgs { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px; display: block; }
+.msgs > * + * { margin-top: 12px; }
+.msg { display: block; max-width: 92%; }
+.msg > * + * { margin-top: 6px; }
+.msg.from-user { margin-left: auto; width: fit-content; }
+.msg.from-bot { margin-right: auto; width: 92%; }
+.msg .bub, .msg .meta { display: block; }
+.msg .trace { display: block; }
+.msg .trace span { display: inline-block; margin: 0 6px 6px 0; }
+.msg.from-user .bub { background: linear-gradient(135deg, rgba(31, 210, 155, 0.28), rgba(31, 210, 155, 0.16)); border: 1px solid rgba(31, 210, 155, 0.35); border-bottom-right-radius: 4px; }
+.msg.from-bot .bub { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-bottom-left-radius: 4px; }
 .bub { padding: 10px 12px; border-radius: 14px; white-space: pre-wrap; line-height: 1.55; font-size: 13.5px; overflow-wrap: anywhere; }
 .msg .meta { font: 11px var(--mono); }
 .msg .meta.ok { color: var(--turf); } .msg .meta.bad { color: var(--amber); }
+pre.report { margin: 0; white-space: pre-wrap; font: 11.5px/1.6 var(--mono); background: transparent; border: 0; padding: 0; overflow: visible; }
+.copyrep { justify-self: start; margin-top: 8px; padding: 6px 10px; font-size: 12px; }
 .typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
 .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
 .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
@@ -514,7 +521,21 @@ const DATA = /*DATA*/null;
       inputSchema: { type: "object", properties: { id: { type: "string" }, distance_m: { type: "number", enum: [2, 5] }, limit_percent: { type: "number" } } },
       execute: (i) => { if (i.id && games.some((g) => g.id === String(i.id))) { sel = String(i.id); mom = 0; } if (Number(i.distance_m) === 2 || Number(i.distance_m) === 5) dist = Number(i.distance_m);
         const l = Number(i.limit_percent); if (l >= 1 && l <= 60) limit = l / 100; render(); return { shown: true, game: G().match, distance_m: dist, limit_percent: Math.round(limit * 100), games_passing: games.filter((g) => share(g).rate <= limit).length }; } },
+    { name: "show_moment", description: "Draws one review moment of a game on the pitch overlay at the top of the console, so the viewer can see both sources' player positions. Input: game id and rank (1 = worst moment).",
+      inputSchema: { type: "object", properties: { id: { type: "string" }, rank: { type: "integer", minimum: 1, maximum: 10 } }, required: ["id"] },
+      execute: (i) => { const g = games.find((x) => x.id === String(i.id)); if (!g) throw new Error("unknown game id"); const k = Math.min(Math.max(1, Number(i.rank) || 1), g.queue.length) - 1;
+        sel = g.id; mom = k; render(); $("overview").scrollIntoView({ behavior: "smooth", block: "start" });
+        const q = g.queue[k]; return { shown: true, game: g.match, half: q.period, minute: Math.floor(q.statsbomb_t / 60), event: q.event, median_gap_m: r1(q.median_m), estimated_players: q.estimated_players, players: q.players }; } },
+    { name: "acceptance_report", description: "Builds the acceptance report for the current gate (or the given distance_m and limit_percent): pass/fail per game with the share far apart and its 95% interval. The viewer gets a copyable report in the chat. Returns the summary.",
+      inputSchema: { type: "object", properties: { distance_m: { type: "number", enum: [2, 5] }, limit_percent: { type: "number" } } },
+      execute: (i) => { const d = Number(i.distance_m) === 2 ? 2 : Number(i.distance_m) === 5 ? 5 : dist; const l = Number(i.limit_percent) >= 1 && Number(i.limit_percent) <= 60 ? Number(i.limit_percent) : Math.round(limit * 100);
+        const rows = games.map((g) => { const s = d === 2 ? g.over2 : g.over5; return { game: g.match, date: g.date, pct_over: r1(100 * s.rate), ci95: [r1(100 * s.lo95), r1(100 * s.hi95)], verdict: 100 * s.rate <= l ? "PASS" : "FAIL" }; }).sort((a, b) => b.pct_over - a.pct_over);
+        const pass = rows.filter((r) => r.verdict === "PASS").length;
+        const txt = [`TrackGate acceptance report · ${DATA.generated}`, `Sources: PFF FC broadcast tracking vs StatsBomb 360 · ${games.length} games · ${nf(T.n)} positions`, `Gate: at most ${l}% of positions more than ${d} m apart`, `Result: ${pass} of ${rows.length} games pass`, "", ...rows.map((r) => `${r.verdict}  ${r.game} (${r.date}): ${r.pct_over}% over ${d} m (95% CI ${r.ci95[0]}–${r.ci95[1]}%)`)].join("\n");
+        reportQueue.push(txt);
+        return { distance_m: d, limit_percent: l, passing: pass, of: rows.length, games: rows }; } },
   ];
+  const reportQueue = [];
   function allowed(extra) {
     const acc = new Set([1, 2, 5, 10, 90, 95, 100, 2022, games.length]);
     const walk = (v) => { if (typeof v === "number" && isFinite(v)) { [v, r1(v), Math.round(v)].forEach((z) => acc.add(z)); if (v <= 1) { acc.add(r1(100 * v)); acc.add(Math.round(100 * v)); } } else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === "object") Object.values(v).forEach(walk); };
@@ -525,15 +546,15 @@ const DATA = /*DATA*/null;
     while ((m = re.exec(text))) { n++; const x = Number(m[1].replace(/,/g, "")); if (!ok.some((a) => Math.abs(a - x) <= Math.max(0.051, 0.006 * Math.abs(a)))) bad.push(m[1]); }
     return { n, bad: [...new Set(bad)] };
   }
-  const QS = ["Which game fails worst, and what drives it?", "Can PFF's 'estimated' positions be trusted for officiating?", "What limit would let 8 of the 10 games pass at 5 m?"];
+  const QS = ["Which game fails worst? Show me the worst moment.", "Can PFF's 'estimated' positions be trusted for officiating?", "Give me an acceptance report at 5 m with a 10% limit."];
   $("qs").innerHTML = QS.map((q, i) => `<button type="button" class="qbtn" data-q="${i}">${q}</button>`).join("");
   let sampleFn = null, ctl = null;
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-  const LABEL = { list_games: "Reading all games", game_detail: "Opening game detail", simulate_gate: "Testing a gate", show_in_console: "Updating your view" };
+  const LABEL = { list_games: "Reading all games", game_detail: "Opening game detail", simulate_gate: "Testing a gate", show_in_console: "Updating your view", show_moment: "Drawing a moment on the pitch", acceptance_report: "Building the acceptance report" };
   let turns = [], working = false;
   const RULES = () => `You are the analyst inside TrackGate, a console that tests whether two player-tracking sources agree. This run: ${games.length} games of the 2022 FIFA World Cup, PFF FC broadcast tracking compared with StatsBomb 360 freeze frames; neither source is ground truth. Rules: use the tools for every figure and never state a number you did not get from a tool. Reply in English, at most 70 words, in exactly three short lines: (1) the direct answer in one sentence, (2) the one or two figures that prove it, (3) "Recommendation:" followed by one practical step. Plain words for a league operations or broadcast data lead; no lists, no jargon, no caveats beyond one clause. When a specific game or gate answers the question, call show_in_console so the viewer sees it. The viewer's current view: distance ${dist} m, limit ${Math.round(limit * 100)}%, selected game ${G().match} (id ${sel}).`;
   const scrollMsgs = () => { const m = $("msgs"); m.scrollTop = m.scrollHeight; };
-  function addMsg(role, html) { const d = document.createElement("div"); d.className = "msg " + role; d.innerHTML = `<div class="bub">${html}</div>`; $("msgs").append(d); scrollMsgs(); return d; }
+  function addMsg(role, html) { const d = document.createElement("div"); d.className = "msg from-" + role; d.innerHTML = `<div class="bub">${html}</div>`; $("msgs").append(d); scrollMsgs(); return d; }
   function welcome() {
     $("msgs").innerHTML = `<div class="welcome">Hi, I'm the TrackGate analyst. I read this run through the console's own tools, and every figure I give is checked against the data before you see it. Pick a question below or ask your own.</div>`;
     $("qs").hidden = false;
@@ -562,6 +583,13 @@ const DATA = /*DATA*/null;
       if (c.bad.length) { let h = esc(text); c.bad.forEach((b) => { h = h.split(b).join(`<mark class="unv">${b}</mark>`); }); bub.innerHTML = h; meta.className = "meta bad"; meta.textContent = `Not found in the data: ${c.bad.join(", ")}. Treat highlighted figures as unverified.`; }
       else { bub.textContent = text; meta.className = "meta ok"; meta.textContent = c.n ? `✓ ${c.n} figure${c.n === 1 ? "" : "s"} checked against the data` : "✓ No figures to check"; }
       turns.push({ role: "user", content: q }, { role: "assistant", content: text });
+      while (reportQueue.length) {
+        const rep = reportQueue.shift();
+        const box = addMsg("bot", `<pre class="report"></pre><button type="button" class="btn ghost copyrep">Copy report</button>`);
+        box.querySelector("pre").textContent = rep;
+        const btn = box.querySelector(".copyrep");
+        btn.addEventListener("click", () => { const done = () => (btn.textContent = "Copied"); try { navigator.clipboard.writeText(rep).then(done, () => { const r = document.createRange(); r.selectNodeContents(box.querySelector("pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected, press Ctrl+C"; }); } catch (e) {} });
+      }
     } catch (e) {
       const code = e && e.code;
       const msg = { cancelled: "Stopped.", not_granted: "The analyst needs your permission to use Claude. Allow it in the prompt to continue.", rate_limited: "Too many questions at once. Try again in a minute.", tools_unavailable: "This viewer cannot run the analyst's tools.", session_expired: "Please sign in again to use the analyst.", sampling_disabled: "Claude is not available for this account." }[code] || "The analyst could not answer. Please try again.";
